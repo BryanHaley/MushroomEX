@@ -34,6 +34,9 @@
 # compiled libs
 lib/*
 
+#assimp
+include/assimp
+
 # gl3w
 src/gl3w.c
 include/GL
