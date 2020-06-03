@@ -31,6 +31,8 @@ ASSIMP_LIB := $(ASSIMP_DIR)/bin/libassimp.so
 GL3W_DIR := tools/gl3w
 GL3W_SRC := $(GL3W_DIR)/src/gl3w.c
 
+GLM_DIR := tools/glm
+
 # Sources
 C_SRCS   := $(shell find $(SRC_DIR) -name *.c)
 CXX_SRCS := $(shell find $(SRC_DIR) -name *.cpp)
@@ -68,7 +70,18 @@ $(BUILD_DIR)/%.c.o: %.c
 	$(MKDIR) $(dir $@)
 	$(CC) $(C_FLAGS) -c $< -o $@
 
-build_libs: create_dirs build_assimp build_gl3w
+create_dirs:
+	$(MKDIR) include
+	$(MKDIR) include/assimp
+	$(MKDIR) include/glm
+	$(MKDIR) lib
+	$(MKDIR) $(BUILD_DIR)
+	$(MKDIR) $(BIN_DIR)
+
+clean:
+	-$(RM_DIR) $(BUILD_DIR)
+
+build_libs: create_dirs build_assimp build_gl3w build_glm
 
 build_assimp:
 	$(CD) $(ASSIMP_DIR) && $(CMAKE) CMakeLists.txt
@@ -81,17 +94,10 @@ build_gl3w:
 	$(CP_DIR) $(GL3W_DIR)/include/* include/
 	$(CP) $(GL3W_SRC) src/
 
-create_dirs:
-	$(MKDIR) include
-	$(MKDIR) include/assimp
-	$(MKDIR) lib
-	$(MKDIR) $(BUILD_DIR)
-	$(MKDIR) $(BIN_DIR)
+build_glm:
+	$(CP_DIR) $(GLM_DIR)/glm/* include/glm/
 
-clean:
-	-$(RM_DIR) $(BUILD_DIR)
-
-clean_libs: clean_assimp clean_gl3w
+clean_libs: clean_assimp clean_gl3w clean_glm
 
 clean_assimp:
 	-$(CD) tools/assimp && $(MAKE) clean
@@ -102,3 +108,6 @@ clean_gl3w:
 	-$(RM_DIR) include/GL
 	-$(RM_DIR) include/KHR
 	-$(RM) src/gl3w.c
+
+clean_glm:
+	-$(RM_DIR) include/glm

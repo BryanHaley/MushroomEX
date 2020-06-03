@@ -4,3 +4,6 @@
 [submodule "tools/gl3w"]
 	path = tools/gl3w
 	url = https://github.com/skaslev/gl3w.git
+[submodule "tools/glm"]
+	path = tools/glm
+	url = https://github.com/g-truc/glm.git
