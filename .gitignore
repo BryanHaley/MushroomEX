@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# compiled libs
+lib/*
+
+# gl3w
+src/gl3w.c
+tools/gl3w/src
+tools/gl3w/include
+include/GL
+include/KHR
