@@ -1,3 +1,6 @@
 [submodule "tools/assimp"]
 	path = tools/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "tools/gl3w"]
+	path = tools/gl3w
+	url = https://github.com/skaslev/gl3w.git
