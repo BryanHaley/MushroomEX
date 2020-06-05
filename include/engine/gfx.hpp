@@ -8,7 +8,7 @@ extern GLuint MISSING_TEXTURE_INDEX;
 extern std::vector<model_t> g_LoadedModels;
 extern glm::mat4 view_matrix, projection_matrix, vp_matrix;
 
-mesh_t create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices, GLfloat* vertices, GLuint texture);
+mesh_t create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices, GLfloat* vertices, GLuint diffuse_texture, GLuint normal_texture, GLuint specular_texture);
 model_t create_model(int *error, const std::string directory, const std::string filename, const std::string type);
 void draw_model(model_t *model);
 void draw_mesh(mesh_t *mesh);

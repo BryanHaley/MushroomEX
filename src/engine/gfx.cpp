@@ -1,4 +1,5 @@
 #include <vector>
+#include <GL/gl3w.h>
 #include "engine/gfx.hpp"
 
 #include "glm/glm.hpp"
@@ -9,6 +10,8 @@ glm::mat4 view_matrix, projection_matrix;
 
 bool gfx_init()
 {
+	glEnable(GL_DEPTH_TEST);
+	
 	view_matrix = glm::lookAt(glm::vec3(0.0f,0.0f,0.0f), glm::vec3(0.0f,0.0f,1.0f), glm::vec3(0.0f,1.0f,0.0f));
 	projection_matrix = glm::perspective(glm::radians(90.0f), 800.0f/600.0f, 1.0f, 1000.0f);
 

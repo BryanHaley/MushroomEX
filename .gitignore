@@ -49,7 +49,3 @@ include/KHR
 
 # SOIL2
 include/SOIL2
-tools/SOIL2/bin
-tools/SOIL2/build
-tools/SOIL2/include
-tools/SOIL2/src

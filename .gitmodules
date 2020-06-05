@@ -10,3 +10,6 @@
 [submodule "tools/SOIL2/SOIL2"]
 	path = tools/SOIL2/SOIL2
 	url = https://github.com/SpartanJ/SOIL2.git
+[submodule "soil2"]
+	path = tools/SOIL2
+	url = https://github.com/SpartanJ/SOIL2.git

@@ -45,10 +45,16 @@ const char *fragmentShaderSource = "#version 330 core\n"
 	"in vec3 frag_position;\n"
     "in vec3 frag_normal;\n"
     "in vec2 frag_texcoord;\n"
+
     "out vec4 FragColor;\n"
+
+    "uniform sampler2D diffuse_texture;\n"
+    "uniform sampler2D normal_texture;\n"
+    "uniform sampler2D specular_texture;\n"
+
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "   FragColor = texture(diffuse_texture, frag_texcoord);\n"
     "}\n\0";
 
 int main()
@@ -130,6 +136,10 @@ int main()
     GLuint shader_view_mat_loc = glGetUniformLocation(shaderProgram, "view_mat");
     GLuint shader_proj_mat_loc = glGetUniformLocation(shaderProgram, "proj_mat");
 
+    GLuint shader_diffuse_texture_loc = glGetUniformLocation(shaderProgram, "diffuse_texture");
+    GLuint shader_normal_texture_loc = glGetUniformLocation(shaderProgram, "normal_texture");
+    GLuint shader_specular_texture_loc = glGetUniformLocation(shaderProgram, "specular_texture");
+
     gfx_init();
 
     // render loop
@@ -143,7 +153,7 @@ int main()
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // draw our first triangle
         glUseProgram(shaderProgram);
@@ -154,6 +164,10 @@ int main()
         glUniformMatrix4fv(shader_model_mat_loc, 1, GL_FALSE, &model_matrix[0][0]);
         glUniformMatrix4fv(shader_view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
         glUniformMatrix4fv(shader_proj_mat_loc, 1, GL_FALSE, &projection_matrix[0][0]);
+
+        glUniform1i(shader_diffuse_texture_loc, 0);
+        glUniform1i(shader_normal_texture_loc, 1);
+        glUniform1i(shader_specular_texture_loc, 2);
 
         draw_model(&g_LoadedModels[0]);
  
