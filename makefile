@@ -11,7 +11,7 @@ LD  := clang++
 PYTHON := python
 
 CMAKE  := cmake
-make   := make
+MAKE   := make
 MKDIR  := mkdir -p
 CP_DIR := cp -r
 RM_DIR := rm -r
@@ -20,18 +20,24 @@ CD     := cd
 RM     := rm
 
 # Directories
-SRC_DIR   := src
-OBJ_DIR   := obj
-BUILD_DIR := build
-BIN_DIR   := bin
+SRC_DIR     := src
+BUILD_DIR   := build
+BIN_DIR     := bin
+LIB_DIR     := lib
+INCLUDE_DIR := include
 
 ASSIMP_DIR := tools/assimp
-ASSIMP_LIB := $(ASSIMP_DIR)/bin/libassimp.so
+ASSIMP_LIB := $(ASSIMP_DIR)/bin/libassimp.*
 
 GL3W_DIR := tools/gl3w
 GL3W_SRC := $(GL3W_DIR)/src/gl3w.c
 
 GLM_DIR := tools/glm
+
+SOIL2_DIR := tools/SOIL2
+SOIL2_LIB := $(SOIL2_DIR)/bin/libSOIL2.a
+
+INSTALL_LIB_PATH := /usr/lib/
 
 # Sources
 C_SRCS   := $(shell find $(SRC_DIR) -name *.c)
@@ -41,11 +47,11 @@ OBJS     := $(foreach file, $(CXX_SRCS), $(BUILD_DIR)/$(file).o) \
 
 # Libraries
 LD_FLAGS := -Llib
-LD_FLAGS += -lc -lstdc++ -lglfw -ldl
+LD_FLAGS += -lc -lstdc++ -lglfw -ldl -lassimp -lSOIL2
 
 # C Flags
-C_FLAGS   := -Iinclude -Wall
-CXX_FLAGS := -Iinclude -Wall
+C_FLAGS   := -I$(INCLUDE_DIR) -Wall
+CXX_FLAGS := -I$(INCLUDE_DIR) -Wall
 
 ifeq ($(DEBUG_BUILD), 1)
 	C_FLAGS   += -g
@@ -56,6 +62,8 @@ endif
 # Target exe
 TARGET_EXE = mushroom_ex
 
+
+# Rules
 all: create_dirs $(TARGET_EXE)
 
 $(TARGET_EXE): $(OBJS)
@@ -71,43 +79,61 @@ $(BUILD_DIR)/%.c.o: %.c
 	$(CC) $(C_FLAGS) -c $< -o $@
 
 create_dirs:
-	$(MKDIR) include
-	$(MKDIR) include/assimp
-	$(MKDIR) include/glm
-	$(MKDIR) lib
+	$(MKDIR) $(INCLUDE_DIR)
+	$(MKDIR) $(INCLUDE_DIR)/assimp
+	$(MKDIR) $(INCLUDE_DIR)/glm
+	$(MKDIR) $(LIB_DIR)
 	$(MKDIR) $(BUILD_DIR)
 	$(MKDIR) $(BIN_DIR)
 
 clean:
 	-$(RM_DIR) $(BUILD_DIR)
 
-build_libs: create_dirs build_assimp build_gl3w build_glm
+build_libs: create_dirs build_assimp build_gl3w build_glm build_SOIL2
 
 build_assimp:
 	$(CD) $(ASSIMP_DIR) && $(CMAKE) CMakeLists.txt
 	$(CD) $(ASSIMP_DIR) && $(MAKE)
-	$(CP_DIR) $(ASSIMP_DIR)/include/assimp/* include/assimp/
-	$(CP) $(ASSIMP_LIB) lib/
+	$(CP_DIR) $(ASSIMP_DIR)/include/assimp/* $(INCLUDE_DIR)/assimp/
+	$(CP_DIR) $(ASSIMP_LIB) $(LIB_DIR)/
 
 build_gl3w:
 	$(CD) $(GL3W_DIR) && $(PYTHON) gl3w_gen.py
-	$(CP_DIR) $(GL3W_DIR)/include/* include/
-	$(CP) $(GL3W_SRC) src/
+	$(CP_DIR) $(GL3W_DIR)/include/* $(INCLUDE_DIR)/
+	$(CP) $(GL3W_SRC) $(SRC_DIR)/
 
 build_glm:
-	$(CP_DIR) $(GLM_DIR)/glm/* include/glm/
+	$(CP_DIR) $(GLM_DIR)/glm/* $(INCLUDE_DIR)/glm/
 
-clean_libs: clean_assimp clean_gl3w clean_glm
+build_SOIL2:
+	$(MKDIR) $(SOIL2_DIR)/src
+	$(CP) $(SRC_DIR)/gl3w.c $(SOIL2_DIR)/src/
+	$(CP_DIR) $(INCLUDE_DIR)/GL $(SOIL2_DIR)/src/
+	$(CP_DIR) $(INCLUDE_DIR)/KHR $(SOIL2_DIR)/src/
+	$(CD) $(SOIL2_DIR) && $(MAKE)
+	$(CP_DIR) $(SOIL2_DIR)/include/* $(INCLUDE_DIR)/
+	$(CP) $(SOIL2_LIB) $(LIB_DIR)/
+
+install_libs:
+	$(CP) $(LIB_DIR)/* $(INSTALL_LIB_PATH)
+
+clean_libs: clean_assimp clean_gl3w clean_glm clean_SOIL2
 
 clean_assimp:
-	-$(CD) tools/assimp && $(MAKE) clean
-	-$(RM_DIR) include/assimp
-	-$(RM) $(ASSIMP_LIB)
+	-$(CD) $(ASSIMP_DIR) && $(MAKE) clean
+	-$(RM_DIR) $(INCLUDE_DIR)/assimp
+	-$(RM) $(LIB_DIR)/libassimp.*
 
 clean_gl3w:
-	-$(RM_DIR) include/GL
-	-$(RM_DIR) include/KHR
-	-$(RM) src/gl3w.c
+	-$(RM_DIR) $(INCLUDE_DIR)/GL
+	-$(RM_DIR) $(INCLUDE_DIR)/KHR
+	-$(RM) $(SRC_DIR)/gl3w.c
 
 clean_glm:
-	-$(RM_DIR) include/glm
+	-$(RM_DIR) $(INCLUDE_DIR)/glm
+
+clean_SOIL2:
+	-$(CD) $(SOIL2_DIR) && $(MAKE) clean
+	-$(RM_DIR) $(INCLUDE_DIR)/SOIL2
+	-$(RM_DIR) $(SOIL2_DIR)/src
+	-$(RM) $(LIB_DIR)/libSOIL2.a

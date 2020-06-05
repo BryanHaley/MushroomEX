@@ -3,15 +3,14 @@
 
 #include <iostream>
 
+#include "engine/error_return_types.h"
+#include "engine/gfx.hpp"
+
+#include "glm/glm.hpp"
+#include "glm/gtx/transform.hpp"
+
 #define OPENGL_MAJOR 3
 #define OPENGL_MINOR 3
-
-#define NO_ERR 0
-#define UNSPECIFIED_ERR -1
-#define OGL_UNSUPPORTED_ERR -2
-#define GLFW_ERR -3
-#define GL3W_ERR -4
-#define SHADER_ERR -5
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -21,12 +20,31 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec3 normal;\n"
+    "layout (location = 2) in vec2 texcoord;\n"
+
+    "out vec3 frag_position;\n"
+    "out vec3 frag_normal;\n"
+    "out vec2 frag_texcoord;\n"
+
+    "uniform mat4 model_mat;\n"
+    "uniform mat4 view_mat;\n"
+    "uniform mat4 proj_mat;\n"
+
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   frag_position = position;\n"
+    "   frag_normal = normal;\n"
+    "   frag_texcoord = texcoord;\n"
+
+    "	vec4 transformed_pos = proj_mat * view_mat * model_mat * vec4(position, 1.0);\n"
+    "   gl_Position = transformed_pos;\n"
     "}\0";
 const char *fragmentShaderSource = "#version 330 core\n"
+	"in vec3 frag_position;\n"
+    "in vec3 frag_normal;\n"
+    "in vec2 frag_texcoord;\n"
     "out vec4 FragColor;\n"
     "void main()\n"
     "{\n"
@@ -108,36 +126,11 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // left  
-         0.5f, -0.5f, 0.0f, // right 
-         0.0f,  0.5f, 0.0f  // top   
-    }; 
+    GLuint shader_model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
+    GLuint shader_view_mat_loc = glGetUniformLocation(shaderProgram, "view_mat");
+    GLuint shader_proj_mat_loc = glGetUniformLocation(shaderProgram, "proj_mat");
 
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
-
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0); 
-
-
-    // uncomment this call to draw in wireframe polygons.
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    gfx_init();
 
     // render loop
     // -----------
@@ -154,9 +147,15 @@ int main()
 
         // draw our first triangle
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        // glBindVertexArray(0); // no need to unbind it every time 
+        
+        glm::mat4 model_matrix(1.0f);
+        model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 5.0f));
+        model_matrix = glm::rotate(model_matrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(shader_model_mat_loc, 1, GL_FALSE, &model_matrix[0][0]);
+        glUniformMatrix4fv(shader_view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
+        glUniformMatrix4fv(shader_proj_mat_loc, 1, GL_FALSE, &projection_matrix[0][0]);
+
+        draw_model(&g_LoadedModels[0]);
  
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -166,9 +165,9 @@ int main()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &VAO);
+    /*glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
+    glDeleteProgram(shaderProgram);*/
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
