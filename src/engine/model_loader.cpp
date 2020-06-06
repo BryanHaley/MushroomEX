@@ -15,7 +15,7 @@
 void processNode(std::vector<mesh_t> *meshes, const std::string directory, aiNode *node, const aiScene *scene);
 mesh_t processMesh(aiMesh *mesh, const std::string directory, const aiScene *scene);
 
-model_t gfx_create_model(int *error, const std::string directory, const std::string filename, const std::string type)
+model_t gfx_create_model(int *error_code, const std::string directory, const std::string filename, const std::string type)
 {
 	// Load model into assimp scene
 	Assimp::Importer importer;
@@ -27,14 +27,14 @@ model_t gfx_create_model(int *error, const std::string directory, const std::str
 	if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
     	printf("ERROR::ASSIMP::%s\n", importer.GetErrorString());
-    	*error = MODEL_LOADER_ERR;
+    	*error_code = MODEL_LOADER_ERR;
         return model;
     }
 
     // recurse through scene tree looking for meshes
     processNode(&model.meshes, directory, scene->mRootNode, scene);
 
-    *error = NO_ERR;
+    *error_code = NO_ERR;
     return model;
 }
 
@@ -115,17 +115,21 @@ mesh_t processMesh(aiMesh *mesh, const std::string directory, const aiScene *sce
     scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_NAME, name);
     std::string name_str = std::string(name.data);
 
+    // Attempt to automatically cut off extension if it exists
+    // Advise people not to put periods in material names.
+    if (name_str.find('.')!=std::string::npos) name_str = name_str.substr(0, name_str.find_last_of('.'));
+
     std::string diffuse_filename = directory + "/" + name_str + "_diffuse.png";
     std::string normal_filename = directory + "/" + name_str + "_normal.png";
     std::string specular_filename = directory + "/" + name_str + "_specular.png";
 
-    GLuint diffuse_texture = SOIL_load_OGL_texture(diffuse_filename.c_str(), SOIL_LOAD_RGBA, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
-    GLuint normal_texture = SOIL_load_OGL_texture(normal_filename.c_str(), SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
-    GLuint specular_texture = SOIL_load_OGL_texture(specular_filename.c_str(), SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
+    GLuint diffuse_texture = SOIL_load_OGL_texture(diffuse_filename.c_str(), SOIL_LOAD_RGBA, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
+    GLuint normal_texture = SOIL_load_OGL_texture(normal_filename.c_str(), SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
+    GLuint specular_texture = SOIL_load_OGL_texture(specular_filename.c_str(), SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
 
-    if (diffuse_texture < 0) fprintf(stderr, "ERROR::UNABLE TO LOAD DIFFUSE TEXTURE %s\n", diffuse_filename.c_str());
-    if (normal_texture < 0) fprintf(stderr, "ERROR::UNABLE TO LOAD NORMAL TEXTURE %s\n", normal_filename.c_str());
-    if (specular_texture < 0) fprintf(stderr, "ERROR::UNABLE TO LOAD SPECULAR TEXTURE %s\n", specular_filename.c_str());
+    if (diffuse_texture <= 0) fprintf(stderr, "ERROR::UNABLE TO LOAD DIFFUSE TEXTURE %s\n", diffuse_filename.c_str());
+    //if (normal_texture <= 0) fprintf(stderr, "ERROR::UNABLE TO LOAD NORMAL TEXTURE %s\n", normal_filename.c_str());
+    //if (specular_texture <= 0) fprintf(stderr, "ERROR::UNABLE TO LOAD SPECULAR TEXTURE %s\n", specular_filename.c_str());
 
     mesh_t result_mesh = gfx_create_mesh(num_indices, indices, num_vertices, vertices, color_vec4, diffuse_texture, normal_texture, specular_texture);
 

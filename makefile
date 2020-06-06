@@ -2,6 +2,7 @@
 
 # Options
 DEBUG_BUILD ?= 0
+DEBUG_SPECTATOR ?= 0
 
 # Commands
 CC  := clang
@@ -55,14 +56,21 @@ LD_FLAGS := -L$(LIB_DIR) -lc -lstdc++ -lsoil2 -lglfw -ldl -lassimp
 C_FLAGS   := -I$(INCLUDE_DIR) -Wall
 CXX_FLAGS := -I$(INCLUDE_DIR) -Wall
 
-ifeq ($(DEBUG_BUILD), 1)
-	C_FLAGS   += -g
-	CXX_FLAGS += -g
-	LD_FLAGS  += -g
-endif
-
 # Target exe
 TARGET_EXE = mushroom_ex
+
+# Handle options
+ifeq ($(DEBUG_BUILD), 1)
+	C_FLAGS   += -g -DDEBUG_BUILD
+	CXX_FLAGS += -g -DDEBUG_BUILD
+	LD_FLAGS  += -g -DDEBUG_BUILD
+endif
+
+ifeq ($(DEBUG_SPECTATOR), 1)
+	C_FLAGS   += -DDEBUG_SPECTATOR
+	CXX_FLAGS += -DDEBUG_SPECTATOR
+	LD_FLAGS  += -DDEBUG_SPECTATOR
+endif
 
 
 # Rules

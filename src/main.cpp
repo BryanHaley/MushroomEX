@@ -9,13 +9,17 @@
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
+#ifdef DEBUG_SPECTATOR
+#include "debug_spectator.hpp"
+#endif
+
 #define OPENGL_MAJOR 3
 #define OPENGL_MINOR 3
 
 // Provide sensible defaults
 unsigned int g_ScrWidth = 1280;
 unsigned int g_ScrHeight = 720;
-float g_FOV = 90.0f;
+float g_FOV = 45.0f;
 float g_Near = 0.1f;
 float g_Far = 1000.0f;
 bool g_Fullscreen = false;
@@ -39,7 +43,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(g_ScrWidth, g_ScrHeight, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(g_ScrWidth, g_ScrHeight, "MushroomEX", NULL, NULL);
     if (window == NULL)
     {
         fprintf(stderr, "ERROR::GLFW::Could not create GLFW window.\n");
@@ -60,6 +64,10 @@ int main()
 
     if (gfx_init() != NO_ERR) return GFX_ERR;
 
+    #ifdef DEBUG_SPECTATOR
+    debug_spectator_init();
+    #endif
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -67,6 +75,7 @@ int main()
         g_CurrentFrameTime = glfwGetTime();
         g_DeltaTime = g_CurrentFrameTime - g_LastFrameTime;
 
+        glfwPollEvents();
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -79,7 +88,6 @@ int main()
         gfx_draw_model(&g_LoadedModels[0], model_matrix);
  
         glfwSwapBuffers(window);
-        glfwPollEvents();
 
         g_LastFrameTime = g_CurrentFrameTime;
     }
@@ -92,6 +100,28 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    #ifdef DEBUG_SPECTATOR
+
+    glm::vec3 wishMove(0.0f);
+    if      (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) wishMove.z =  10.0f * g_DeltaTime;
+    else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) wishMove.z = -10.0f * g_DeltaTime;
+    if      (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) wishMove.x =  10.0f * g_DeltaTime;
+    else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) wishMove.x = -10.0f * g_DeltaTime;
+    if      (glfwGetKey(window, GLFW_KEY_SPACE)        == GLFW_PRESS) wishMove.y =  10.0f * g_DeltaTime;
+    else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) wishMove.y = -10.0f * g_DeltaTime;
+
+    //if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) wishMove = wishMove * 2;
+
+    glm::vec2 wishLook(0.0f);
+    if      (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) wishLook.x = glm::radians( 50.0f * g_DeltaTime);
+    else if (glfwGetKey(window, GLFW_KEY_LEFT)  == GLFW_PRESS) wishLook.x = glm::radians(-50.0f * g_DeltaTime);
+    if      (glfwGetKey(window, GLFW_KEY_UP)    == GLFW_PRESS) wishLook.y = glm::radians(-50.0f * g_DeltaTime);
+    else if (glfwGetKey(window, GLFW_KEY_DOWN)  == GLFW_PRESS) wishLook.y = glm::radians( 50.0f * g_DeltaTime);
+
+    debug_spectator_update(wishMove, wishLook);
+
+    #endif
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)

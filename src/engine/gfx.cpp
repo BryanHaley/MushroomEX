@@ -9,11 +9,17 @@
 
 std::vector<model_t> g_LoadedModels;
 std::vector<shader_t> g_LoadedShaders;
+glm::vec3 g_WorldUpVector, g_WorldForwardVector, g_WorldRightVector;
 glm::mat4 g_ViewMatrix, g_ProjMatrix;
 
 int gfx_init()
 {
 	fprintf(stderr, "OpenGL version is (%s)\n\n", glGetString(GL_VERSION));
+
+	g_WorldRightVector   = glm::vec3(1.0f, 0.0f, 0.0f);
+	g_WorldUpVector 	 = glm::vec3(0.0f, 1.0f, 0.0f);
+	g_WorldForwardVector = glm::vec3(0.0f, 0.0f, 1.0f);
+
 	glEnable(GL_DEPTH_TEST);
 
 	// Set up default view and projection matrices
@@ -26,7 +32,7 @@ int gfx_init()
 	if (error_code != NO_ERR) return error_code;
 
 	// Test
-	g_LoadedModels.push_back(gfx_create_model(&error_code, "mnt/mush/models/backpack", "backpack", "obj"));
+	g_LoadedModels.push_back(gfx_create_model(&error_code, "mnt/mush/models/bob", "bob", "obj"));
 	if (error_code != NO_ERR) return error_code;
 
 	return NO_ERR;
