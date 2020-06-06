@@ -1,7 +1,9 @@
+#include <GL/gl3w.h>
+#include "glm/glm.hpp"
 #include "engine/gfx_data.hpp"
 #include "engine/gfx.hpp"
 
-mesh_t gfx_create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices, GLfloat* vertices, GLuint diffuse_texture, GLuint normal_texture, GLuint specular_texture)
+mesh_t gfx_create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices, GLfloat* vertices, glm::vec4 color, GLuint diffuse_texture, GLuint normal_texture, GLuint specular_texture)
 {
 	mesh_t mesh;
 
@@ -30,11 +32,13 @@ mesh_t gfx_create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices,
     glBindVertexArray(0);
 
     mesh.m_Shader = &g_LoadedShaders[DEFAULT_SHADER_INDEX];
-    mesh.m_Color = glm::vec3(1.0f, 1.0f, 1.0f);
+    mesh.m_NumIndices = num_indices;
     mesh.m_Diffuse = diffuse_texture;
     mesh.m_Normal = normal_texture;
     mesh.m_Specular = specular_texture;
-    mesh.m_NumIndices = num_indices;
+    mesh.m_Color = color;
+    // Discard colors for now. TODO: support some sort of material file for setting color blending modes
+    mesh.m_ColorBlendMode = CB_DISCARD;
 
 	return mesh;
 }

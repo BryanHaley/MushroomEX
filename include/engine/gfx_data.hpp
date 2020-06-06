@@ -23,6 +23,7 @@ typedef struct
 	GLuint m_ShaderProgram;
 	GLuint u_ModelMatrix, u_ViewMatrix, u_ProjMatrix;
 	GLuint u_DiffuseTex, u_NormalTex, u_SpecularTex;
+	GLuint u_Color, u_ColorBlendMode;
 } shader_t;
 
 typedef struct
@@ -31,13 +32,23 @@ typedef struct
 	std::vector<std::string> m_Names;
 } tex_map;
 
+enum MESH_COLOR_BLEND_MODES
+{
+	CB_DISCARD = 0, // Discard material colors
+	CB_ADD, // Add Colors
+	CB_MULT, // Multiply Colors
+	CB_ALPHA, // Override Texture Alpha Channel
+	CB_COLOR_ONLY // Color Only
+};
+
 typedef struct
 {
 	shader_t *m_Shader;
 	GLuint VAO, VBO, EBO;
 	size_t m_NumIndices;
 	GLuint m_Diffuse, m_Normal, m_Specular;
-	glm::vec3 m_Color;
+	glm::vec4 m_Color;
+	GLuint m_ColorBlendMode;
 } mesh_t;
 
 typedef struct

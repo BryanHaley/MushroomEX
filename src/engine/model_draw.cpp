@@ -14,12 +14,16 @@ void gfx_draw_model(model_t *model, glm::mat4 matrix)
 
 			glUseProgram(shader->m_ShaderProgram);
 
-			glUniform1i(shader->u_DiffuseTex, DIFFUSE_GLTEXTURE_LOC);
-	        glUniform1i(shader->u_NormalTex, NORMAL_GLTEXTURE_LOC);
-	        glUniform1i(shader->u_SpecularTex, SPECULAR_GLTEXTURE_LOC);
 			glUniformMatrix4fv(shader->u_ModelMatrix, 1, GL_FALSE, &matrix[0][0]);
 			glUniformMatrix4fv(shader->u_ViewMatrix, 1, GL_FALSE, &g_ViewMatrix[0][0]);
 			glUniformMatrix4fv(shader->u_ProjMatrix, 1, GL_FALSE, &g_ProjMatrix[0][0]);
+
+			glUniform1i(shader->u_DiffuseTex, DIFFUSE_GLTEXTURE_LOC);
+	        glUniform1i(shader->u_NormalTex, NORMAL_GLTEXTURE_LOC);
+	        glUniform1i(shader->u_SpecularTex, SPECULAR_GLTEXTURE_LOC);
+			
+			glUniform4fv(shader->u_Color, 1, &model->meshes[i].m_Color[0]);
+			glUniform1i(shader->u_ColorBlendMode, model->meshes[i].m_ColorBlendMode);
 		}
 
 		gfx_draw_mesh(&model->meshes[i]);

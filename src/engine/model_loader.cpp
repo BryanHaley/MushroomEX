@@ -103,9 +103,16 @@ mesh_t processMesh(aiMesh *mesh, const std::string directory, const aiScene *sce
         }
     }
 
+    // Get Material Color
+    aiColor3D color;
+    scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+    float opacity;
+    scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_OPACITY, opacity);
+    glm::vec4 color_vec4(color.r, color.g, color.b, opacity);
+
     // For now just try to load "{materialname}_diffuse.png" for the texture.
     aiString name;
-    scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_NAME,name);
+    scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_NAME, name);
     std::string name_str = std::string(name.data);
 
     std::string diffuse_filename = directory + "/" + name_str + "_diffuse.png";
@@ -120,7 +127,7 @@ mesh_t processMesh(aiMesh *mesh, const std::string directory, const aiScene *sce
     if (normal_texture < 0) fprintf(stderr, "ERROR::UNABLE TO LOAD NORMAL TEXTURE %s\n", normal_filename.c_str());
     if (specular_texture < 0) fprintf(stderr, "ERROR::UNABLE TO LOAD SPECULAR TEXTURE %s\n", specular_filename.c_str());
 
-    mesh_t result_mesh = gfx_create_mesh(num_indices, indices, num_vertices, vertices, diffuse_texture, normal_texture, specular_texture);
+    mesh_t result_mesh = gfx_create_mesh(num_indices, indices, num_vertices, vertices, color_vec4, diffuse_texture, normal_texture, specular_texture);
 
     free(vertices);
     free(indices);

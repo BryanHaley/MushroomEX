@@ -87,6 +87,9 @@ shader_t gfx_create_shader(int *error_code, const std::string directory, const s
     shader.u_NormalTex = glGetUniformLocation(shader.m_ShaderProgram, "u_NormalTex");
     shader.u_SpecularTex = glGetUniformLocation(shader.m_ShaderProgram, "u_SpecularTex");
 
+    shader.u_Color = glGetUniformLocation(shader.m_ShaderProgram, "u_Color");
+    shader.u_ColorBlendMode = glGetUniformLocation(shader.m_ShaderProgram, "u_ColorBlendMode");
+
     *error_code = NO_ERR;
     return shader;
 }
