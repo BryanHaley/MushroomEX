@@ -15,7 +15,7 @@
 void processNode(std::vector<mesh_t> *meshes, const std::string directory, aiNode *node, const aiScene *scene);
 mesh_t processMesh(aiMesh *mesh, const std::string directory, const aiScene *scene);
 
-model_t create_model(int *error, const std::string directory, const std::string filename, const std::string type)
+model_t gfx_create_model(int *error, const std::string directory, const std::string filename, const std::string type)
 {
 	// Load model into assimp scene
 	Assimp::Importer importer;
@@ -120,7 +120,7 @@ mesh_t processMesh(aiMesh *mesh, const std::string directory, const aiScene *sce
     if (normal_texture < 0) fprintf(stderr, "ERROR::UNABLE TO LOAD NORMAL TEXTURE %s\n", normal_filename.c_str());
     if (specular_texture < 0) fprintf(stderr, "ERROR::UNABLE TO LOAD SPECULAR TEXTURE %s\n", specular_filename.c_str());
 
-    mesh_t result_mesh = create_mesh(num_indices, indices, num_vertices, vertices, diffuse_texture, normal_texture, specular_texture);
+    mesh_t result_mesh = gfx_create_mesh(num_indices, indices, num_vertices, vertices, diffuse_texture, normal_texture, specular_texture);
 
     free(vertices);
     free(indices);

@@ -1,7 +1,7 @@
 #include "engine/gfx_data.hpp"
 #include "engine/gfx.hpp"
 
-mesh_t create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices, GLfloat* vertices, GLuint diffuse_texture, GLuint normal_texture, GLuint specular_texture)
+mesh_t gfx_create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices, GLfloat* vertices, GLuint diffuse_texture, GLuint normal_texture, GLuint specular_texture)
 {
 	mesh_t mesh;
 
@@ -29,11 +29,12 @@ mesh_t create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices, GLf
 
     glBindVertexArray(0);
 
-    mesh.color = glm::vec3(1.0f, 1.0f, 1.0f);
-    mesh.diffuse = diffuse_texture;
-    mesh.normal = normal_texture;
-    mesh.specular = specular_texture;
-    mesh.num_indices = num_indices;
+    mesh.m_Shader = &g_LoadedShaders[DEFAULT_SHADER_INDEX];
+    mesh.m_Color = glm::vec3(1.0f, 1.0f, 1.0f);
+    mesh.m_Diffuse = diffuse_texture;
+    mesh.m_Normal = normal_texture;
+    mesh.m_Specular = specular_texture;
+    mesh.m_NumIndices = num_indices;
 
 	return mesh;
 }
