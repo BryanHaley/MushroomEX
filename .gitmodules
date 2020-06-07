@@ -16,3 +16,6 @@
 [submodule "tools/yaml-cpp"]
 	path = tools/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "bin/mnt/base"]
+	path = bin/mnt/base
+	url = https://github.com/BryanHaley/MushroomEX_BaseGame.git
