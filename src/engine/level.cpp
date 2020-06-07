@@ -24,6 +24,12 @@ level_t load_level_from_file(int *error_code, std::string filename)
     std::vector<std::string> level_geo_models;
     level_geo_models.push_back(level_yaml["scene"]["objects"]["level_geo"]["file"].as<std::string>());
     *error_code = load_level_models(&level, level_geo_models);
+    if (*error_code != NO_ERR) return level;
+
+    std::vector<std::string> level_collision_files;
+    level_collision_files.push_back(level_yaml["scene"]["objects"]["level_collision"]["file"].as<std::string>());
+    *error_code = load_level_collision(&level, level_collision_files);
+    if (*error_code != NO_ERR) return level;
 
 	return level;
 }
@@ -64,33 +70,29 @@ int load_level_collision(level_t *level, std::vector<std::string> collision_file
     {
         if (collision_files[i].compare("") != 0)
         {
-
-            std::vector<collision_surface_t> surfaces = create_collision_surfaces_from_file(&error_code, collision_files[i]);
-
+            create_collision_surfaces_from_file(&error_code, &level->m_CollisionSurfaces, "mnt/" + collision_files[i]);
             if (error_code != NO_ERR)
             {
                 fprintf(stderr, "ERROR::LEVEL::Could not load collision model from file: %s\n", collision_files[i].c_str());
                 return FILE_IO_ERR;
             }
-
-            for (size_t i = 0; i < surfaces.size(); i++) level->m_CollisionSurfaces.push_back(surfaces[i]);
         }
     }
 
     return error_code;
 }
 
-void update_level()
+void update_level(level_t* level)
 {
 
 }
 
-void draw_level()
+void draw_level(level_t* level)
 {
 
 }
 
-void unload_level()
+void unload_level(level_t* level)
 {
 
 }

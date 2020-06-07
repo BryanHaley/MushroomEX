@@ -8,11 +8,11 @@ level_t load_level_from_file(int *error_code, std::string filename);
 int load_level_models(level_t *level, std::vector<std::string> geometry_files);
 int load_level_collision(level_t *level, std::vector<std::string> collision_files);
 
-void update_level();
-void draw_level();
+void update_level(level_t* level);
+void draw_level(level_t* level);
 
-void unload_level();
+void unload_level(level_t* level);
 
-std::vector<collision_surface_t> create_collision_surfaces_from_file(int *error_code, const std::string filename);
+void create_collision_surfaces_from_file(int *error_code, std::vector<collision_surface_t> *surfaces, const std::string filename);
 
 #endif

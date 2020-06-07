@@ -16,41 +16,34 @@
  *  that will let me encode surface data along with the triangles of the collision surfaces into a single file.
  */
 
-void cs_processNode(std::vector<collision_surface_t> surfaces, aiNode *node, const aiScene *scene);
-std::vector<collision_surface_t> cs_processMesh(aiMesh *mesh, const aiScene *scene);
+void cs_processNode(std::vector<collision_surface_t> *surfaces, aiNode *node, const aiScene *scene);
+void cs_processMesh(std::vector<collision_surface_t> *surfaces, aiMesh *mesh, const aiScene *scene);
 
-std::vector<collision_surface_t> create_collision_surfaces_from_file(int *error_code, const std::string filename)
+void create_collision_surfaces_from_file(int *error_code, std::vector<collision_surface_t> *surfaces, const std::string filename)
 {
 	// Load model into assimp scene
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(filename, aiProcess_Triangulate);
-
-	std::vector<collision_surface_t> surfaces;
 
 	// error check
 	if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
     	printf("ERROR::ASSIMP::%s\n", importer.GetErrorString());
     	*error_code = MODEL_LOADER_ERR;
-        return surfaces;
+        return;
     }
 
     // recurse through scene tree looking for meshes
     cs_processNode(surfaces, scene->mRootNode, scene);
-
-    *error_code = NO_ERR;
-    return surfaces;
 }
 
-void cs_processNode(std::vector<collision_surface_t> surfaces, aiNode *node, const aiScene *scene)
+void cs_processNode(std::vector<collision_surface_t> *surfaces, aiNode *node, const aiScene *scene)
 {
     // process each mesh located at the current node
     for(size_t i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        std::vector<collision_surface_t> mesh_surfaces = cs_processMesh(mesh, scene);
-
-        for (size_t i = 0; i < mesh_surfaces.size(); i++) surfaces.push_back(mesh_surfaces[i]);
+        cs_processMesh(surfaces, mesh, scene);
     }
     // continue through tree
     for(size_t i = 0; i < node->mNumChildren; i++)
@@ -60,10 +53,8 @@ void cs_processNode(std::vector<collision_surface_t> surfaces, aiNode *node, con
 
 }
 
-std::vector<collision_surface_t> cs_processMesh(aiMesh *mesh, const aiScene *scene)
+void cs_processMesh(std::vector<collision_surface_t> *surfaces, aiMesh *mesh, const aiScene *scene)
 {
-    std::vector<collision_surface_t> surfaces;
-
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
         struct aiFace face = mesh->mFaces[i];
@@ -82,8 +73,6 @@ std::vector<collision_surface_t> cs_processMesh(aiMesh *mesh, const aiScene *sce
         aiVector3D mesh_v2 = mesh->mVertices[face.mIndices[2]];
         surface.v2 = glm::vec3(mesh_v2.x, mesh_v2.y, mesh_v2.z);
 
-        surfaces.push_back(surface);
+        surfaces->push_back(surface);
     }
-
-    return surfaces;
 }
