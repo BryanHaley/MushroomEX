@@ -38,8 +38,12 @@ GL3W_SRC := $(GL3W_DIR)/src/gl3w.c
 GLM_DIR := tools/glm
 
 SOIL2_DIR      := tools/SOIL2
-SOIL2_LIB      := $(SOIL2_DIR)/lib/linux/libsoil2
+SOIL2_LIB      := $(SOIL2_DIR)/lib/linux/libsoil2.so
+
 SOIL2_MAKE_DIR := $(SOIL2_DIR)/make/linux
+
+YAMLCPP_DIR := tools/yaml-cpp
+YAMLCPP_LIB := $(YAMLCPP_DIR)/build/libyaml-cpp.a
 
 INSTALL_LIB_PATH := /usr/lib/
 
@@ -50,7 +54,7 @@ OBJS     := $(foreach file, $(CXX_SRCS), $(BUILD_DIR)/$(file).o) \
 		    $(foreach file, $(C_SRCS), $(BUILD_DIR)/$(file).o)
 
 # Libraries
-LD_FLAGS := -L$(LIB_DIR) -lc -lstdc++ -lsoil2 -lglfw -ldl -lassimp
+LD_FLAGS := -L$(LIB_DIR) -lc -lstdc++ -lsoil2 -lglfw -ldl -lassimp -lyaml-cpp
 
 # C Flags
 C_FLAGS   := -I$(INCLUDE_DIR) -Wall
@@ -73,7 +77,8 @@ ifeq ($(DEBUG_SPECTATOR), 1)
 endif
 
 
-# Rules
+# Rules for building MushroomEX
+
 all: create_dirs $(TARGET_EXE)
 
 $(TARGET_EXE): $(OBJS)
@@ -100,7 +105,10 @@ create_dirs:
 clean:
 	-$(RM_DIR) $(BUILD_DIR)
 
-build_libs: create_dirs build_assimp build_gl3w build_glm build_SOIL2
+
+# Rules for handling support libraries
+
+build_libs: create_dirs build_assimp build_gl3w build_glm build_SOIL2 build_yamlcpp
 
 build_assimp:
 	$(CD) $(ASSIMP_DIR) && $(CMAKE) CMakeLists.txt
@@ -120,13 +128,21 @@ build_SOIL2:
 	$(CD) $(SOIL2_DIR) && $(PREMAKE) gmake
 	$(CD) $(SOIL2_MAKE_DIR) && $(MAKE) config=release
 	$(CP_DIR) $(SOIL2_DIR)/src/SOIL2/SOIL2.h $(INCLUDE_DIR)/SOIL2/
-	$(CP_DIR) $(SOIL2_LIB).a $(LIB_DIR)/
-	$(CP_DIR) $(SOIL2_LIB).so $(LIB_DIR)/
+	$(CP_DIR) $(SOIL2_LIB) $(LIB_DIR)/
+
+build_yamlcpp:
+	$(MKDIR) $(YAMLCPP_DIR)/build
+	$(CD) $(YAMLCPP_DIR)/build && $(CMAKE) -DYAML_BUILD_SHARED_LIBS=ON ..
+	$(CD) $(YAMLCPP_DIR)/build && $(MAKE)
+	$(CP) $(YAMLCPP_LIB) $(LIB_DIR)
+	$(CP_DIR) $(YAMLCPP_DIR)/include/yaml-cpp $(INCLUDE_DIR)
+
 
 install_libs:
 	$(CP) $(LIB_DIR)/* $(INSTALL_LIB_PATH)
 
-clean_libs: clean_assimp clean_gl3w clean_glm clean_SOIL2
+
+clean_libs: clean_assimp clean_gl3w clean_glm clean_SOIL2 clean_yamlcpp
 
 clean_assimp:
 	-$(CD) $(ASSIMP_DIR) && $(MAKE) clean
@@ -143,5 +159,9 @@ clean_glm:
 
 clean_SOIL2:
 	-$(RM_DIR) $(INCLUDE_DIR)/SOIL2
-	-$(RM) $(LIB_DIR)/libsoil2.a
 	-$(RM) $(LIB_DIR)/libsoil2.so
+
+clean_yamlcpp:
+	-$(RM_DIR) $(YAMLCPP_DIR)/build
+	-$(RM) $(LIB_DIR)/libyaml-cpp.so
+	-$(RM_DIR) $(INCLUDE_DIR)/yaml-cpp

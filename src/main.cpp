@@ -82,10 +82,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 model_matrix(1.0f);
-        model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 5.0f));
-        model_matrix = glm::rotate(model_matrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        //model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
+        //model_matrix = glm::rotate(model_matrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        gfx_draw_model(&g_LoadedModels[0], model_matrix);
+        for (size_t i = 0; i < g_LoadedModels.size(); i++)
+        {
+            gfx_draw_model(&g_LoadedModels[i], model_matrix);
+        }
  
         glfwSwapBuffers(window);
 

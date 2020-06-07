@@ -1,6 +1,7 @@
 #include <vector>
 #include <GL/gl3w.h>
 
+#include "engine/level.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
@@ -14,6 +15,8 @@ glm::mat4 g_ViewMatrix, g_ProjMatrix;
 
 int gfx_init()
 {
+	int error_code = NO_ERR;
+
 	fprintf(stderr, "OpenGL version is (%s)\n\n", glGetString(GL_VERSION));
 
 	g_WorldRightVector   = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -27,13 +30,16 @@ int gfx_init()
 	gfx_update_render_viewport(g_ScrWidth, g_ScrHeight, g_FOV, g_Near, g_Far);
 
 	// Load default shader
-	int error_code;
 	g_LoadedShaders.push_back(gfx_create_shader(&error_code, "mnt/mush/shaders", "default_mesh", "vert", "frag"));
 	if (error_code != NO_ERR) return error_code;
 
 	// Test
-	g_LoadedModels.push_back(gfx_create_model(&error_code, "mnt/mush/models/bob", "bob", "obj"));
+	g_LoadedModels.push_back(gfx_create_model(&error_code, "mnt/mush/models", "error", "fbx"));
 	if (error_code != NO_ERR) return error_code;
+
+	level_t level = load_level_from_file(&error_code, "mnt/mush/levels/bob/bob.scene.yaml");
+	if (error_code != NO_ERR) return error_code;
+	g_LoadedModels.push_back(level.m_Geometry[0]);
 
 	return NO_ERR;
 }

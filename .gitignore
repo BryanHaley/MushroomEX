@@ -49,3 +49,6 @@ include/KHR
 
 # SOIL2
 include/SOIL2
+
+# YAML-CPP
+include/yaml-cpp

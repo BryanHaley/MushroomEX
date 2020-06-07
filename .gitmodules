@@ -13,3 +13,6 @@
 [submodule "soil2"]
 	path = tools/SOIL2
 	url = https://github.com/SpartanJ/SOIL2.git
+[submodule "tools/yaml-cpp"]
+	path = tools/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

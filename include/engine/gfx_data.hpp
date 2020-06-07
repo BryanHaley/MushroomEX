@@ -35,10 +35,10 @@ typedef struct
 enum MESH_COLOR_BLEND_MODES
 {
 	CB_DISCARD = 0, // Discard material colors
-	CB_ADD, // Add Colors
-	CB_MULT, // Multiply Colors
-	CB_ALPHA, // Override Texture Alpha Channel
-	CB_COLOR_ONLY // Color Only
+	CB_ADD,         // Add Colors
+	CB_MULT,        // Multiply Colors
+	CB_ALPHA,       // Override Texture Alpha Channel
+	CB_COLOR_ONLY   // Color Only
 };
 
 typedef struct
