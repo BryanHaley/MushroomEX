@@ -58,3 +58,6 @@ include/SOIL2
 
 # YAML-CPP
 include/yaml-cpp
+
+# GLFW
+include/GLFW

@@ -4,21 +4,12 @@
 #include <vector>
 #include <stdint.h>
 #include "glm/glm.hpp"
-#include "gfx_data.hpp"
 
 typedef struct
 {
 	glm::vec3 v0, v1, v2;
 	uint32_t flags;
 } collision_surface_t;
-
-typedef struct
-{
-	// Visual models
-	std::vector<model_t> m_Geometry;
-	// Static collision triangles
-	std::vector<collision_surface_t> m_CollisionSurfaces;
-} level_t;
 
 // flag values for collision_surface_t
 

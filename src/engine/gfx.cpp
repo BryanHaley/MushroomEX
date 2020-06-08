@@ -1,7 +1,6 @@
 #include <vector>
 #include <GL/gl3w.h>
 
-#include "engine/level.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
@@ -32,14 +31,6 @@ int gfx_init()
 	// Load default shader
 	g_LoadedShaders.push_back(gfx_create_shader(&error_code, "mnt/base/shaders", "default_mesh", "vert", "frag"));
 	if (error_code != NO_ERR) return error_code;
-
-	// Test
-	g_LoadedModels.push_back(gfx_create_model(&error_code, "mnt/base/models", "error", "fbx"));
-	if (error_code != NO_ERR) return error_code;
-
-	level_t level = load_level_from_file(&error_code, "mnt/base/levels/bob/bob.scene.yaml");
-	if (error_code != NO_ERR) return error_code;
-	g_LoadedModels.push_back(level.m_Geometry[0]);
 
 	return NO_ERR;
 }

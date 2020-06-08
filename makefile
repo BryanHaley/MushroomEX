@@ -121,7 +121,7 @@ endif
 
 # C Flags
 C_FLAGS   := -I$(INCLUDE_DIR) -Wall
-CXX_FLAGS := -I$(INCLUDE_DIR) -Wall -std=c++11
+CXX_FLAGS := -I$(INCLUDE_DIR) -Wall -std=c++14
 
 # Target exe
 TARGET_EXE := mushroom_ex
@@ -158,8 +158,11 @@ endif
 
 # Rules for building MushroomEX
 
-all: build_libs build
-build: create_dirs $(TARGET_EXE)
+build: all
+build_and_run: all
+	$(CD) $(BIN_DIR) && ./$(TARGET_EXE)
+
+all: create_dirs $(TARGET_EXE)
 
 $(TARGET_EXE): $(OBJS)
 	$(LD) $(LD_FLAGS) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXE)

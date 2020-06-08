@@ -8,18 +8,22 @@
 
 #include "engine/error_return_types.h"
 #include "engine/gfx.hpp"
-#include "engine/level.hpp"
+#include "engine/surface_data.hpp"
+#include "game/scene.hpp"
 
-/*
- *  For now just load the triangles from a model with assimp just like mesh_loader.cpp
- *  In the future when I have a level editor set up, I'll want to create a custom OBJ-like file format for static geometry
- *  that will let me encode surface data along with the triangles of the collision surfaces into a single file.
- */
+using namespace Scene;
+using std::string, std::vector;
 
-void cs_processNode(std::vector<collision_surface_t> *surfaces, aiNode *node, const aiScene *scene);
-void cs_processMesh(std::vector<collision_surface_t> *surfaces, aiMesh *mesh, const aiScene *scene);
+namespace Scene {
+void ProcessNode(vector<collision_surface_t> *surfaces, aiNode *node, const aiScene *scene);
+void ProcessMesh(vector<collision_surface_t> *surfaces, aiMesh *mesh, const aiScene *scene);
+}
 
-void create_collision_surfaces_from_file(int *error_code, std::vector<collision_surface_t> *surfaces, const std::string filename)
+/* For now just load the triangles from a model with assimp just like mesh_loader.cpp In the future when I
+ * have a level editor set up, I'll want to create a custom OBJ-like file format for static geometry that will
+ * let me encode surface data along with the triangles of the collision surfaces into a single file. */
+
+void Scene::CreateSurfacesFromFile(int *error_code, vector<collision_surface_t> *surfaces, const string filename)
 {
 	// Load model into assimp scene
 	Assimp::Importer importer;
@@ -34,26 +38,26 @@ void create_collision_surfaces_from_file(int *error_code, std::vector<collision_
     }
 
     // recurse through scene tree looking for meshes
-    cs_processNode(surfaces, scene->mRootNode, scene);
+    ProcessNode(surfaces, scene->mRootNode, scene);
 }
 
-void cs_processNode(std::vector<collision_surface_t> *surfaces, aiNode *node, const aiScene *scene)
+void Scene::ProcessNode(vector<collision_surface_t> *surfaces, aiNode *node, const aiScene *scene)
 {
     // process each mesh located at the current node
     for(size_t i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        cs_processMesh(surfaces, mesh, scene);
+        ProcessMesh(surfaces, mesh, scene);
     }
     // continue through tree
     for(size_t i = 0; i < node->mNumChildren; i++)
     {
-        cs_processNode(surfaces, node->mChildren[i], scene);
+        ProcessNode(surfaces, node->mChildren[i], scene);
     }
 
 }
 
-void cs_processMesh(std::vector<collision_surface_t> *surfaces, aiMesh *mesh, const aiScene *scene)
+void Scene::ProcessMesh(vector<collision_surface_t> *surfaces, aiMesh *mesh, const aiScene *scene)
 {
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)
     {

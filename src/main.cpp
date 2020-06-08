@@ -5,6 +5,7 @@
 
 #include "engine/error_return_types.h"
 #include "engine/gfx.hpp"
+#include "game/scene.hpp"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
@@ -68,6 +69,12 @@ int main()
     debug_spectator_init();
     #endif
 
+    int error_code;
+    Scene::scene_t scene;
+    Scene::Init(&scene);
+    Scene::LoadFromFile(&error_code, &scene, "mnt/base/scenes/bob/bob.scene.yaml");
+    if (error_code != NO_ERR) return error_code;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -81,20 +88,16 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 model_matrix(1.0f);
-        //model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
-        //model_matrix = glm::rotate(model_matrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        for (size_t i = 0; i < g_LoadedModels.size(); i++)
-        {
-            gfx_draw_model(&g_LoadedModels[i], model_matrix);
-        }
+        //Test
+        Scene::QueueModelDraw (&scene, 0, 0);
+        Scene::Draw(&scene);
  
         glfwSwapBuffers(window);
 
         g_LastFrameTime = g_CurrentFrameTime;
     }
 
+    //Scene::Unload(&scene);
     glfwTerminate();
     return NO_ERR;
 }
