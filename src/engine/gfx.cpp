@@ -30,14 +30,14 @@ int gfx_init()
 	gfx_update_render_viewport(g_ScrWidth, g_ScrHeight, g_FOV, g_Near, g_Far);
 
 	// Load default shader
-	g_LoadedShaders.push_back(gfx_create_shader(&error_code, "mnt/mush/shaders", "default_mesh", "vert", "frag"));
+	g_LoadedShaders.push_back(gfx_create_shader(&error_code, "mnt/base/shaders", "default_mesh", "vert", "frag"));
 	if (error_code != NO_ERR) return error_code;
 
 	// Test
-	g_LoadedModels.push_back(gfx_create_model(&error_code, "mnt/mush/models", "error", "fbx"));
+	g_LoadedModels.push_back(gfx_create_model(&error_code, "mnt/base/models", "error", "fbx"));
 	if (error_code != NO_ERR) return error_code;
 
-	level_t level = load_level_from_file(&error_code, "mnt/mush/levels/bob/bob.scene.yaml");
+	level_t level = load_level_from_file(&error_code, "mnt/base/levels/bob/bob.scene.yaml");
 	if (error_code != NO_ERR) return error_code;
 	g_LoadedModels.push_back(level.m_Geometry[0]);
 

@@ -108,11 +108,7 @@ C_FLAGS   := -I$(INCLUDE_DIR) -Wall
 CXX_FLAGS := -I$(INCLUDE_DIR) -Wall -std=c++11
 
 # Target exe
-TARGET_EXE = mushroom_ex
-
-ifeq ($(WIN64_BUILD), 1)
-	TARGET_EXE = mushroom_ex.exe
-endif
+TARGET_EXE := mushroom_ex
 
 # Handle options
 ifeq ($(DEBUG_BUILD), 1)
@@ -125,6 +121,22 @@ ifeq ($(DEBUG_SPECTATOR), 1)
 	C_FLAGS   += -DDEBUG_SPECTATOR
 	CXX_FLAGS += -DDEBUG_SPECTATOR
 	LD_FLAGS  += -DDEBUG_SPECTATOR
+endif
+
+ifeq ($(WIN64_BUILD), 1)
+	TARGET_EXE := mushroom_ex.exe
+	C_FLAGS    += -DWIN64_BUILD
+	CXX_FLAGS  += -DWIN64_BUILD
+endif
+
+ifeq ($(LINUX_BUILD), 1)
+	C_FLAGS    += -DLINUX_BUILD
+	CXX_FLAGS  += -DLINUX_BUILD
+endif
+
+ifeq ($(MACOS_BUILD), 1)
+	C_FLAGS    += -DMACOS_BUILD
+	CXX_FLAGS  += -DMACOS_BUILD
 endif
 
 
