@@ -1,6 +1,7 @@
 /* Scene Loader
  * Handles loading of scenes from a file */
 
+#include "engine/utils.hpp"
 #include "game/scene.hpp"
 #include "engine/gfx.hpp"
 #include "engine/error_return_types.h"
@@ -14,11 +15,6 @@
 using namespace Scene;
 using std::string;
 using std::vector;
-
-namespace Scene {
-    void LoadLevelGeometry  (int *error_code, scene_t* scene, vector<string> *p_GeometryFiles);
-    void LoadLevelCollision (int *error_code, scene_t* scene, vector<string> *p_CollisionFiles);
-}
 
 void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
 {
@@ -42,63 +38,49 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
 
         // TODO: Out of memory check
 
-        // Test. TODO: Do this properly. I want to get to bed.
-        scene->GameObjects[gObjIndex].index      = gObjIndex;
-        scene->GameObjects[gObjIndex].modelIndex = 0;
-        scene->GObjNames  [gObjIndex]            = scene_yaml["scene"]["objects"][index]["name"].as<string>();
-        scene->Transforms [gObjIndex]            = glm::mat4(1.0f);
+        // Set name and index of Game Object
+        scene->GameObjects[gObjIndex].index = gObjIndex;
+        scene->GObjNames  [gObjIndex]       = scene_yaml["scene"]["objects"][index]["name"].as<string>();
+        // TODO: Maybe sort game objects by name so we can do better than O(n) when searching by name?
+        //       That said, search by name should -usually- only be done during init and not runtime.
 
-        // Get rid of this part. Just load the models as gobjs use them.
-        if (scene_yaml["scene"]["objects"][index]["model"]) 
-        geoModels.push_back(scene_yaml["scene"]["objects"][index]["model"].as<string>());
+        // Generate transform from position and euler rotation
+        float position[] = { scene_yaml["scene"]["objects"][index]["pos"][0].as<float>(),
+                             scene_yaml["scene"]["objects"][index]["pos"][1].as<float>(), 
+                             scene_yaml["scene"]["objects"][index]["pos"][2].as<float>(), };
+        float rotation[] = { scene_yaml["scene"]["objects"][index]["rot"][0].as<float>(),
+                             scene_yaml["scene"]["objects"][index]["rot"][1].as<float>(), 
+                             scene_yaml["scene"]["objects"][index]["rot"][2].as<float>(), };
 
+        scene->Transforms[gObjIndex] = Utils::MatrixFromPosRot(position, rotation);
+
+
+        // TODO: manage loading of models so we don't load duplicate models.
+        // Load visual model. TODO: null checks
+        scene->LoadedModels.push_back(gfx_create_model(error_code, 
+            "mnt/" + scene_yaml["scene"]["objects"][index]["model"].as<string>()));
+        scene->GameObjects[gObjIndex].modelIndex = scene->LoadedModels.size()-1;
+
+        // Load collision model as surfaces. TODO: null checks
         if (scene_yaml["scene"]["objects"][index]["collType"].as<int>() == GOBJ_SURFACE_COLLIDERS)
-        collModels.push_back(scene_yaml["scene"]["objects"][index]["collFile"].as<string>());
+        {
+            scene->GameObjects[gObjIndex].collisionSurfaceStart = scene->CollisionSurfaces.size();
+            Scene::CreateSurfacesFromFile(error_code, &scene->CollisionSurfaces, 
+                "mnt/" + scene_yaml["scene"]["objects"][index]["collFile"].as<string>());
+            scene->GameObjects[gObjIndex].collisionSurfaceEnd   = scene->CollisionSurfaces.size();
+        }
+
+        // Increment index of next free game object
+        scene->gObjNextFree++;
+
+        // Check for potential overflow and try to prevent it and further overflows
+        if (scene->gObjNextFree == scene->GameObjects.size())
+        {
+            scene->GameObjects.resize (scene->GameObjects.size()+100);
+            scene->GObjNames  .resize (scene->GameObjects.size()+100);
+            scene->Transforms .resize (scene->GameObjects.size()+100);
+        }
 
         index++;
-    }
-
-    // Load objects from files
-    Scene::LoadLevelGeometry(error_code, scene, &geoModels);
-    Scene::LoadLevelCollision(error_code, scene, &collModels);
-}
-
-void Scene::LoadLevelGeometry (int *error_code, scene_t* scene, vector<string> *geometryFiles)
-{
-    for (size_t i = 0; i < geometryFiles->size(); i++)
-    {
-        if ((*geometryFiles)[i].compare("") != 0)
-        {
-            // Decompose filename
-            string directory = (*geometryFiles)[i].substr(0, (*geometryFiles)[i].find_last_of('/'));
-            string filename  = (*geometryFiles)[i].substr((*geometryFiles)[i].find_last_of('/')+1, (*geometryFiles)[i].find_last_of('.')-(*geometryFiles)[i].find_last_of('/')-1);
-            string type      = (*geometryFiles)[i].substr((*geometryFiles)[i].find_last_of('.')+1);
-
-            model_t model = gfx_create_model(error_code, "mnt/" + directory, filename, type);
-
-            if (*error_code != NO_ERR)
-            {
-                fprintf(stderr, "ERROR::LEVEL::Could not load geometry from file: %s\n", (*geometryFiles)[i].c_str());
-                return;
-            }
-
-            scene->LoadedModels.push_back(model);
-        }
-    }
-}
-
-void Scene::LoadLevelCollision (int *error_code, scene_t* scene, vector<string> *collisionFiles)
-{
-    for (size_t i = 0; i < collisionFiles->size(); i++)
-    {
-        if ((*collisionFiles)[i].compare("") != 0)
-        {
-            Scene::CreateSurfacesFromFile(error_code, &scene->CollisionSurfaces, "mnt/" + (*collisionFiles)[i]);
-            if (*error_code != NO_ERR)
-            {
-                fprintf(stderr, "ERROR::LEVEL::Could not load collision surfaces from file: %s\n", (*collisionFiles)[i].c_str());
-                return;
-            }
-        }
     }
 }

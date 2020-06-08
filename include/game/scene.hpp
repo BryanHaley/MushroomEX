@@ -57,6 +57,9 @@ typedef struct
     // -- Command queues --------------------------------
     std::vector<node_draw_model_command_t> DrawModelCommands; // Tells gfx engine what to draw and where every frame.
     uint32_t                               drawModelCommandNextFree; // Next free index in DrawModelCommands
+    uint32_t                               lastStaticDrawCall; // Number of draw calls corresponding to static geo.
+                                                               // Since static geo never changes, it'd be a waste to
+                                                               // regenerate the draw calls every frame.
 } scene_t;
 
 // Loading

@@ -12,14 +12,16 @@
 #include "engine/error_return_types.h"
 #include "engine/gfx.hpp"
 
-void processNode(std::vector<mesh_t> *meshes, const std::string directory, aiNode *node, const aiScene *scene);
-mesh_t processMesh(aiMesh *mesh, const std::string directory, const aiScene *scene);
+using std::string;
 
-model_t gfx_create_model(int *error_code, const std::string directory, const std::string filename, const std::string type)
+void processNode(std::vector<mesh_t> *meshes, const string filename, aiNode *node, const aiScene *scene);
+mesh_t processMesh(aiMesh *mesh, const string filename, const aiScene *scene);
+
+model_t gfx_create_model(int *error_code, const string filename)
 {
 	// Load model into assimp scene
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(directory + "/" + filename + "." + type, aiProcess_Triangulate);
+	const aiScene *scene = importer.ReadFile(filename, aiProcess_Triangulate);
 
 	model_t model;
 
@@ -32,29 +34,29 @@ model_t gfx_create_model(int *error_code, const std::string directory, const std
     }
 
     // recurse through scene tree looking for meshes
-    processNode(&model.meshes, directory, scene->mRootNode, scene);
+    processNode(&model.meshes, filename, scene->mRootNode, scene);
 
     *error_code = NO_ERR;
     return model;
 }
 
-void processNode(std::vector<mesh_t> *meshes, const std::string directory, aiNode *node, const aiScene *scene)
+void processNode(std::vector<mesh_t> *meshes, const string filename, aiNode *node, const aiScene *scene)
 {
     // process each mesh located at the current node
     for(size_t i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes->push_back(processMesh(mesh, directory, scene));
+        meshes->push_back(processMesh(mesh, filename, scene));
     }
     // continue through tree
     for(size_t i = 0; i < node->mNumChildren; i++)
     {
-        processNode(meshes, directory, node->mChildren[i], scene);
+        processNode(meshes, filename, node->mChildren[i], scene);
     }
 
 }
 
-mesh_t processMesh(aiMesh *mesh, const std::string directory, const aiScene *scene)
+mesh_t processMesh(aiMesh *mesh, const string filename, const aiScene *scene)
 {
     int num_indices = 0;
     int num_vertices = mesh->mNumVertices;
@@ -110,18 +112,20 @@ mesh_t processMesh(aiMesh *mesh, const std::string directory, const aiScene *sce
     scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_OPACITY, opacity);
     glm::vec4 color_vec4(color.r, color.g, color.b, opacity);
 
+    string directory = filename.substr(0, filename.find_last_of('/'));
+
     // For now just try to load "{materialname}_diffuse.png" for the texture.
     aiString name;
     scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_NAME, name);
-    std::string name_str = std::string(name.data);
+    string name_str = string(name.data);
 
     // Attempt to automatically cut off extension if it exists
     // Advise people not to put periods in material names.
-    if (name_str.find('.')!=std::string::npos) name_str = name_str.substr(0, name_str.find_last_of('.'));
+    if (name_str.find('.')!=string::npos) name_str = name_str.substr(0, name_str.find_last_of('.'));
 
-    std::string diffuse_filename = directory + "/" + name_str + "_diffuse.png";
-    std::string normal_filename = directory + "/" + name_str + "_normal.png";
-    std::string specular_filename = directory + "/" + name_str + "_specular.png";
+    string diffuse_filename = directory + "/" + name_str + "_diffuse.png";
+    string normal_filename = directory + "/" + name_str + "_normal.png";
+    string specular_filename = directory + "/" + name_str + "_specular.png";
 
     GLuint diffuse_texture = SOIL_load_OGL_texture(diffuse_filename.c_str(), SOIL_LOAD_RGBA, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
     GLuint normal_texture = SOIL_load_OGL_texture(normal_filename.c_str(), SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);

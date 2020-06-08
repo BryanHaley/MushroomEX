@@ -75,6 +75,10 @@ int main()
     Scene::LoadFromFile(&error_code, &scene, "mnt/base/scenes/bob/bob.scene.yaml");
     if (error_code != NO_ERR) return error_code;
 
+    GLint max_combined_texture_image_units;
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max_combined_texture_image_units);
+    printf("Max texture units: %d\n", max_combined_texture_image_units);
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -89,7 +93,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Test
-        Scene::QueueModelDraw (&scene, 0, 0);
+        for (size_t i = 0; i < scene.GameObjects.size(); i++)
+        Scene::QueueModelDraw (&scene, scene.GameObjects[i].modelIndex, scene.GameObjects[i].index);
         Scene::Draw(&scene);
  
         glfwSwapBuffers(window);

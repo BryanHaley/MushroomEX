@@ -39,6 +39,7 @@
 # Directories
 bin/mushroom_ex
 bin/lib
+bin/logs
 build
 lib
 
