@@ -99,6 +99,11 @@ GLFW_DIR         := tools/glfw
 GLFW_LIB_NAME    := libglfw*.$(DYNAMIC_LIB_EXTENSION)
 GLFW_LIB         := $(GLFW_DIR)/src/$(GLFW_LIB_NAME)
 
+ANGSCRPT_DIR     := tools/angelscript
+ANGSCRPT_SRC     := $(ANGSCRPT_DIR)/source
+ANGSCRPT_SRC_DIR := $(SRC_DIR)/angelscript
+ANGSCRPT_HEADER  := angelscript.h
+
 PATCH_SOIL2_LIB_COMMAND :=
 ifeq ($(MACOS_BUILD), 1)
 	SOIL2_LIB        := $(SOIL2_DIR)/lib/macosx/$(SOIL2_LIB_NAME)
@@ -155,6 +160,12 @@ ifeq ($(MACOS_BUILD), 1)
 	CXX_FLAGS  += -DMACOS_BUILD
 endif
 
+# Conditional commands
+WARN_LIBS_COMMAND :=
+ifeq ("$(wildcard $(SRC_DIR)/$(GL3W_SRC))","")
+    WARN_LIBS_COMMAND := @echo "Testtestest"
+endif
+
 
 # Rules for building MushroomEX
 
@@ -162,7 +173,7 @@ build: all
 build_and_run: all
 	$(CD) $(BIN_DIR) && ./$(TARGET_EXE)
 
-all: create_dirs $(TARGET_EXE)
+all: create_dirs check_libs $(TARGET_EXE)
 
 $(TARGET_EXE): $(OBJS)
 	$(LD) $(LD_FLAGS) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXE)
@@ -183,6 +194,9 @@ create_dirs:
 	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(BIN_LIB_DIR)
 
+check_libs:
+	$(WARN_LIBS_COMMAND)
+
 clean:
 	-$(RM_DIR) $(BUILD_DIR)
 	-$(RM) $(BIN_DIR)/$(TARGET_EXE)
@@ -190,7 +204,7 @@ clean:
 
 # Rules for handling support libraries
 
-build_libs: create_dirs build_assimp build_gl3w build_glm build_SOIL2 build_yamlcpp build_glfw
+build_libs: create_dirs build_assimp build_gl3w build_glm build_SOIL2 build_yamlcpp build_glfw build_ascript
 	$(CP) $(LIB_DIR)/* $(BIN_LIB_DIR)/
 
 build_assimp:
@@ -228,8 +242,13 @@ build_glfw:
 	$(CP_DIR) $(GLFW_DIR)/include/GLFW $(INCLUDE_DIR)/
 	$(CP_DIR) $(GLFW_LIB) $(LIB_DIR)/
 
+build_ascript:
+	$(MKDIR) $(ANGSCRPT_SRC_DIR)
+	$(CP) $(ANGSCRPT_SRC)/* $(ANGSCRPT_SRC_DIR)
+	$(CP) $(ANGSCRPT_DIR)/include/$(ANGSCRPT_HEADER) $(INCLUDE_DIR)
 
-clean_libs: clean_lib_dir clean_assimp clean_gl3w clean_glm clean_SOIL2 clean_yamlcpp clean_glfw
+
+clean_libs: clean_lib_dir clean_assimp clean_gl3w clean_glm clean_SOIL2 clean_yamlcpp clean_glfw clean_ascript
 
 clean_lib_dir:
 	-$(RM) $(LIB_DIR)/*
@@ -261,3 +280,7 @@ clean_glfw:
 	-$(CD) $(GLFW_DIR) && $(MAKE) clean
 	-$(RM_DIR) $(INCLUDE_DIR)/GLFW
 	-$(RM) $(LIB_DIR)/$(GLFW_LIB_NAME)
+
+clean_ascript:
+	-$(RM_DIR) $(ANGSCRPT_SRC_DIR)
+	-$(RM) $(INCLUDE_DIR)/$(ANGSCRPT_HEADER)

@@ -41,6 +41,10 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
         // Set name and index of Game Object
         scene->GameObjects[gObjIndex].index = gObjIndex;
         scene->GObjNames  [gObjIndex]       = scene_yaml["scene"]["objects"][index]["name"].as<string>();
+
+        bool active = scene_yaml["scene"]["objects"][index]["active"].as<bool>();
+        scene->GameObjects[gObjIndex].flags = active ? GOBJ_FLAGS_ACTIVE_AND_ALIVE : GOBJ_FLAG_ACTIVE;
+
         // TODO: Sort game objects by model so we can avoid unloading and reloading models
 
         // Generate transform from position and euler rotation

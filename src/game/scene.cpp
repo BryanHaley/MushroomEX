@@ -17,7 +17,6 @@ using std::vector;
 void Scene::Init (scene_t* scene)
 {
     scene->gObjNextFree = 0;
-    scene->drawModelCommandNextFree = 0;
 
     // Reserve space for vectors where object reuse is infrequent
     scene->LoadedModels      .reserve(OBJECT_BANK_SIZE);
@@ -34,30 +33,34 @@ void Scene::Init (scene_t* scene)
     //Utils::CheckIfVectorOutOfMemory(&scene->Transforms, OBJECT_BANK_SIZE);
     //scene->Behaviours      .resize (OBJECT_BANK_SIZE);
     //Utils::CheckIfVectorOutOfMemory(&scene->Behaviours, OBJECT_BANK_SIZE);
-    scene->DrawModelCommands .resize (OBJECT_BANK_SIZE);
-    //Utils::CheckIfVectorOutOfMemory(&scene->DrawModelCommands, OBJECT_BANK_SIZE);
 }
 
 void Scene::Update (scene_t* scene)
 {
-    for (size_t i = 0; i < scene->GameObjects.size(); i++)
+    for (size_t i = 0; i < scene->gObjNextFree; i++)
     {
-        //if (scene->GameObjects[i].flags & GOBJ_FLAG_ACTIVE) 
+        //if (scene->GameObjects[i].flags & GOBJ_FLAGS_ACTIVE_AND_ALIVE)
         //scene->Behaviours[i].update();
     }
 }
 
 void Scene::Draw (scene_t* scene)
 {
-    for (size_t i = 0; i < scene->GameObjects.size(); i++)
+    for (size_t i = 0; i < scene->gObjNextFree; i++)
     {
-        if (scene->GameObjects[i].flags & GOBJ_FLAG_ACTIVE)
+        if (scene->GameObjects[i].flags & GOBJ_FLAGS_ACTIVE_AND_ALIVE)
         gfx_draw_model(&scene->LoadedModels[scene->GameObjects[i].modelIndex], scene->Transforms[i]);
     }
 }
 
 void Scene::Unload (scene_t* scene)
 {
-    free(scene);
-    scene = NULL;
+    scene->gObjNextFree = 0;
+
+    scene->LoadedModels      .clear();
+    scene->CollisionSurfaces .clear();
+    //scene->Animations      .clear();
+    scene->GameObjects       .clear();
+    scene->GObjNames         .clear();
+    scene->Transforms        .clear();
 }

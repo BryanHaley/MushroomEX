@@ -62,3 +62,7 @@ include/yaml-cpp
 
 # GLFW
 include/GLFW
+
+# AngelScript
+include/angelscript.h
+src/angelscript

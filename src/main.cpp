@@ -100,7 +100,7 @@ int main()
         g_LastFrameTime = g_CurrentFrameTime;
     }
 
-    //Scene::Unload(&scene);
+    Scene::Unload(&scene);
     glfwTerminate();
     return NO_ERR;
 }

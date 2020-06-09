@@ -48,4 +48,6 @@ typedef struct
 #define GOBJ_FLAG_CUSTOM3     0b01000000  // Unused flag available for behaviors to modify.
 #define GOBJ_FLAG_CUSTOM4     0b10000000  // Unused flag available for behaviors to modify.
 
+#define GOBJ_FLAGS_ACTIVE_AND_ALIVE 0b00000011 // Shortcut
+
 #endif
