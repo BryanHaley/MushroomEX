@@ -163,7 +163,7 @@ endif
 # Conditional commands
 WARN_LIBS_COMMAND :=
 ifeq ("$(wildcard $(SRC_DIR)/$(GL3W_SRC))","")
-    WARN_LIBS_COMMAND := @echo "Testtestest"
+    WARN_LIBS_COMMAND := @echo "WARNING: LIBS HAVE NOT BEEN BUILT. Run make build_libs"
 endif
 
 
@@ -245,6 +245,7 @@ build_glfw:
 build_ascript:
 	$(MKDIR) $(ANGSCRPT_SRC_DIR)
 	$(CP) $(ANGSCRPT_SRC)/* $(ANGSCRPT_SRC_DIR)
+	$(CP) $(ANGSCRPT_DIR)/add_on/* $(ANGSCRPT_SRC_DIR)
 	$(CP) $(ANGSCRPT_DIR)/include/$(ANGSCRPT_HEADER) $(INCLUDE_DIR)
 
 
