@@ -93,8 +93,6 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Test
-        for (size_t i = 0; i < scene.GameObjects.size(); i++)
-        Scene::QueueModelDraw (&scene, scene.GameObjects[i].modelIndex, scene.GameObjects[i].index);
         Scene::Draw(&scene);
  
         glfwSwapBuffers(window);

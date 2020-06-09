@@ -21,18 +21,6 @@
 
 namespace Scene {
 
-// Model draw commands are implemented as a singly link list so they can easily be sorted by model index,
-// which reduces draw calls as materials/textures don't need to be reloaded.
-typedef struct node_draw_model_command_t node_draw_model_command_t;
-
-struct node_draw_model_command_t
-{
-    int  modelIndex;
-    int  transformIndex;
-
-    node_draw_model_command_t *next;
-};
-
 typedef struct
 {
     // --------------------------------------------------
@@ -53,13 +41,6 @@ typedef struct
     std::vector<model_t>             LoadedModels;      // List of loaded models the gobjs can reference by index.
     std::vector<collision_surface_t> CollisionSurfaces; // List of collision surfaces in the scene.
     //std::vector<animation_t>       Animations;        // List of anims the gobjs can reference by index.
-
-    // -- Command queues --------------------------------
-    std::vector<node_draw_model_command_t> DrawModelCommands; // Tells gfx engine what to draw and where every frame.
-    uint32_t                               drawModelCommandNextFree; // Next free index in DrawModelCommands
-    uint32_t                               lastStaticDrawCall; // Number of draw calls corresponding to static geo.
-                                                               // Since static geo never changes, it'd be a waste to
-                                                               // regenerate the draw calls every frame.
 } scene_t;
 
 // Loading

@@ -21,7 +21,7 @@ int gfx_init();
 void gfx_draw();
 void gfx_update_render_viewport(float width, float height, float FOV, float near, float far);
 
-mesh_t gfx_create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices, GLfloat* vertices, glm::vec4 color, GLuint diffuse_texture, GLuint normal_texture, GLuint specular_texture);
+mesh_t gfx_create_mesh(size_t num_indices, GLuint* indices, size_t num_vertices, vertex_t* vertices, glm::vec4 color, GLuint diffuse_texture, GLuint normal_texture, GLuint specular_texture);
 model_t gfx_create_model(int *error_code, const std::string filename);
 shader_t gfx_create_shader(int *error_code, const std::string directory, const std::string filename, const std::string vShaderExtension, const std::string fShaderExtension);
 void gfx_draw_model(model_t *model, glm::mat4 matrix);

@@ -43,6 +43,13 @@ enum MESH_COLOR_BLEND_MODES
 
 typedef struct
 {
+	glm::vec3 Position;
+    glm::vec3 Normal;
+    glm::vec2 TexCoords;
+} vertex_t;
+
+typedef struct
+{
 	shader_t *m_Shader;
 	GLuint VAO, VBO, EBO;
 	size_t m_NumIndices;

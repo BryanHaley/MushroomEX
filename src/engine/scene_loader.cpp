@@ -41,8 +41,7 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
         // Set name and index of Game Object
         scene->GameObjects[gObjIndex].index = gObjIndex;
         scene->GObjNames  [gObjIndex]       = scene_yaml["scene"]["objects"][index]["name"].as<string>();
-        // TODO: Maybe sort game objects by name so we can do better than O(n) when searching by name?
-        //       That said, search by name should -usually- only be done during init and not runtime.
+        // TODO: Sort game objects by model so we can avoid unloading and reloading models
 
         // Generate transform from position and euler rotation
         float position[] = { scene_yaml["scene"]["objects"][index]["pos"][0].as<float>(),

@@ -66,32 +66,14 @@ mesh_t processMesh(aiMesh *mesh, const string filename, const aiScene *scene)
         num_indices += mesh->mFaces[i].mNumIndices;
     }
     
-    GLfloat* vertices = (GLfloat*) calloc((num_vertices*3)+(num_vertices*3)+(num_vertices*2), sizeof(GLfloat));
+    vertex_t* vertices = (vertex_t*) calloc(num_vertices, sizeof(vertex_t));
     GLuint* indices = (unsigned int*) calloc(num_indices, sizeof(GLuint));
 
-    int last_index = 0;
     for(unsigned int i = 0; i < num_vertices; i++)
     {
-        vertices[i*3] = mesh->mVertices[i].x;
-        vertices[i*3+1] = mesh->mVertices[i].y;
-        vertices[i*3+2] = mesh->mVertices[i].z;
-        last_index = i*3+3;
-    }
-
-    int new_last_index = 0;
-    for(unsigned int i = 0; i < num_vertices; i++)
-    {
-        vertices[i*3+last_index] = mesh->mNormals[i].x;
-        vertices[i*3+1+last_index] = mesh->mNormals[i].y;
-        vertices[i*3+2+last_index] = mesh->mNormals[i].z;
-        new_last_index = i*3+3+last_index;
-    }
-
-    last_index = new_last_index;
-    for(unsigned int i = 0; i < num_vertices; i++)
-    {
-        vertices[i*2+last_index] = mesh->mTextureCoords[0][i].x;
-        vertices[i*2+1+last_index] = mesh->mTextureCoords[0][i].y;
+        vertices[i].Position  = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+        vertices[i].Normal    = glm::vec3(mesh->mNormals[i].x,  mesh->mNormals[i].y,  mesh->mNormals[i].z);
+        vertices[i].TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
     }
 
     int flCounter = 0;

@@ -42,72 +42,22 @@ void Scene::Update (scene_t* scene)
 {
     for (size_t i = 0; i < scene->GameObjects.size(); i++)
     {
-        // etc
+        //if (scene->GameObjects[i].flags & GOBJ_FLAG_ACTIVE) 
+        //scene->Behaviours[i].update();
     }
 }
 
 void Scene::Draw (scene_t* scene)
 {
-    // Traverse model commands and send them to gfx engine
-    node_draw_model_command_t *current = &scene->DrawModelCommands[0];
-
-    while (current != NULL)
+    for (size_t i = 0; i < scene->GameObjects.size(); i++)
     {
-        gfx_draw_model(&scene->LoadedModels[current->modelIndex], scene->Transforms[current->transformIndex]);
-        current = current->next;
+        if (scene->GameObjects[i].flags & GOBJ_FLAG_ACTIVE)
+        gfx_draw_model(&scene->LoadedModels[scene->GameObjects[i].modelIndex], scene->Transforms[i]);
     }
-
-    // Clear the command queue
-    scene->DrawModelCommands[0].next = NULL;
-    scene->drawModelCommandNextFree = 0;
 }
 
 void Scene::Unload (scene_t* scene)
 {
     free(scene);
     scene = NULL;
-}
-
-void Scene::QueueModelDraw (scene_t* scene, int modelIndex, int transformIndex)
-{
-    int index = scene->drawModelCommandNextFree;
-    // Buffer overflow! Generate more objects to (hopefully) avoid additional overflows.
-    if (index == scene->DrawModelCommands.size())
-    {
-        int newSize = scene->DrawModelCommands.size()+100;
-        scene->DrawModelCommands.resize(newSize);
-
-        // Check if we ran out of memory
-        //Utils::CheckIfVectorOutOfMemory(&scene->DrawModelCommands, newSize);
-    }
-
-    scene->DrawModelCommands[index].modelIndex     = modelIndex;
-    scene->DrawModelCommands[index].transformIndex = transformIndex;
-    scene->drawModelCommandNextFree++;
-
-    // If we're the new head of the list
-    if (index == 0)
-    {
-        scene->DrawModelCommands[index].next = NULL;
-        return;
-    }
-
-    // Otherwise, try to find the first draw model command with the same model index and insert ourselves after it. If
-    // we don't find a node with the same model index, just insert ourselves at the end of the list.
-    node_draw_model_command_t *current = &scene->DrawModelCommands[0];
-    node_draw_model_command_t *next    = current->next;
-
-    while (next != NULL)
-    {
-        // We found a node with the same model index, proceed with insertion
-        if (current->modelIndex == scene->DrawModelCommands[index].modelIndex) break;
-
-        // Proceed to next node
-        current = next;
-        next = current->next;
-    }
-
-    // insert the draw model command between the current and next node. If next is null, it's the end of the list.
-    scene->DrawModelCommands[index].next = next;
-    current->next = &scene->DrawModelCommands[index];
 }
