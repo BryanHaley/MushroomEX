@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "engine/error_return_types.h"
+#include "engine/utils.hpp"
 #include "engine/gfx.hpp"
 #include "game/scene.hpp"
 
@@ -31,8 +32,9 @@ void processInput(GLFWwindow *window);
 
 int main()
 {
-    // glfw: initialize and configure
-    // ------------------------------
+    int error_code;
+
+    // glfw: initialize and configure ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_MAJOR);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_MINOR);
@@ -69,15 +71,12 @@ int main()
     debug_spectator_init();
     #endif
 
-    int error_code;
     Scene::scene_t scene;
     Scene::Init(&scene);
     Scene::LoadFromFile(&error_code, &scene, "mnt/base/scenes/bob/bob.scene.yaml");
     if (error_code != NO_ERR) return error_code;
-
-    GLint max_combined_texture_image_units;
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max_combined_texture_image_units);
-    printf("Max texture units: %d\n", max_combined_texture_image_units);
+    Scene::Start(&scene);
+    if (error_code != NO_ERR) return error_code;
 
     // render loop
     // -----------
@@ -93,7 +92,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Test
-        Scene::Draw(&scene);
+        Scene::Update(&scene);
+        Scene::Draw  (&scene);
  
         glfwSwapBuffers(window);
 

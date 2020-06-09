@@ -2,7 +2,9 @@
  * Functions that handle scene operations during runtime. */
 
 #include "engine/utils.hpp"
+#include "engine/script_engine.hpp"
 #include "game/scene.hpp"
+#include "engine/error_return_types.h"
 
 #include <stdlib.h>
 
@@ -31,16 +33,91 @@ void Scene::Init (scene_t* scene)
     //Utils::CheckIfVectorOutOfMemory(&scene->GObjNames, OBJECT_BANK_SIZE);
     scene->Transforms        .resize (OBJECT_BANK_SIZE);
     //Utils::CheckIfVectorOutOfMemory(&scene->Transforms, OBJECT_BANK_SIZE);
-    //scene->Behaviours      .resize (OBJECT_BANK_SIZE);
+    scene->Behaviours        .resize (OBJECT_BANK_SIZE);
     //Utils::CheckIfVectorOutOfMemory(&scene->Behaviours, OBJECT_BANK_SIZE);
+
+    int unused; // InitEngine prints out its non-fatal errors already
+    ScriptEngine::InitEngine(&unused);
+}
+
+void Scene::Start (scene_t* scene)
+{
+    for (size_t i = 0; i < scene->gObjNextFree; i++)
+    {
+        if (scene->GameObjects[i].flags & GOBJ_FLAG_ALIVE)
+        {
+            int error_code;
+            ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_Init);
+
+            if (error_code != NO_ERR)
+            {
+                fprintf(stderr, "ERROR::GAME OBJECT::%s behaviour %s malfunctioned. Deleting Game Object.\n", scene->GObjNames[i].c_str(), scene->Behaviours[i].Name.c_str());
+                scene->GameObjects[i].flags ^= GOBJ_FLAGS_ACTIVE_AND_ALIVE;
+            }
+        }
+
+        if (scene->GameObjects[i].flags & GOBJ_FLAG_ACTIVE)
+        {
+            int error_code;
+            ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_OnActive);
+
+            if (error_code != NO_ERR)
+            {
+                fprintf(stderr, "ERROR::GAME OBJECT::%s behaviour %s malfunctioned. Deleting Game Object.\n", scene->GObjNames[i].c_str(), scene->Behaviours[i].Name.c_str());
+                scene->GameObjects[i].flags ^= GOBJ_FLAGS_ACTIVE_AND_ALIVE;
+            }
+        }
+    }
 }
 
 void Scene::Update (scene_t* scene)
 {
+    // Early Update
     for (size_t i = 0; i < scene->gObjNextFree; i++)
     {
-        //if (scene->GameObjects[i].flags & GOBJ_FLAGS_ACTIVE_AND_ALIVE)
-        //scene->Behaviours[i].update();
+        if (scene->GameObjects[i].flags & GOBJ_FLAGS_ACTIVE_AND_ALIVE)
+        {
+            int error_code;
+            ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_EarlyUpdate);
+
+            if (error_code != NO_ERR)
+            {
+                fprintf(stderr, "ERROR::GAME OBJECT::%s behaviour %s malfunctioned. Deleting Game Object.\n", scene->GObjNames[i].c_str(), scene->Behaviours[i].Name.c_str());
+                scene->GameObjects[i].flags ^= GOBJ_FLAGS_ACTIVE_AND_ALIVE;
+            }
+        }
+    }
+
+    // Update
+    for (size_t i = 0; i < scene->gObjNextFree; i++)
+    {
+        if (scene->GameObjects[i].flags & GOBJ_FLAGS_ACTIVE_AND_ALIVE)
+        {
+            int error_code;
+            ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_Update);
+
+            if (error_code != NO_ERR)
+            {
+                fprintf(stderr, "ERROR::GAME OBJECT::%s behaviour %s malfunctioned. Deleting Game Object.\n", scene->GObjNames[i].c_str(), scene->Behaviours[i].Name.c_str());
+                scene->GameObjects[i].flags ^= GOBJ_FLAGS_ACTIVE_AND_ALIVE;
+            }
+        }
+    }
+
+    // Late Update
+    for (size_t i = 0; i < scene->gObjNextFree; i++)
+    {
+        if (scene->GameObjects[i].flags & GOBJ_FLAGS_ACTIVE_AND_ALIVE)
+        {
+            int error_code;
+            ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_LateUpdate);
+
+            if (error_code != NO_ERR)
+            {
+                fprintf(stderr, "ERROR::GAME OBJECT::%s behaviour %s malfunctioned. Deleting Game Object.\n", scene->GObjNames[i].c_str(), scene->Behaviours[i].Name.c_str());
+                scene->GameObjects[i].flags ^= GOBJ_FLAGS_ACTIVE_AND_ALIVE;
+            }
+        }
     }
 }
 
@@ -63,4 +140,8 @@ void Scene::Unload (scene_t* scene)
     scene->GameObjects       .clear();
     scene->GObjNames         .clear();
     scene->Transforms        .clear();
+    scene->Behaviours        .clear();
+
+    int unused;
+    ScriptEngine::DestroyEngine(&unused);
 }

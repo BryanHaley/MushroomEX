@@ -3,7 +3,9 @@
 
 #include "engine/utils.hpp"
 #include "game/scene.hpp"
+#include "game/game_object.hpp"
 #include "engine/gfx.hpp"
+#include "engine/script_engine.hpp"
 #include "engine/error_return_types.h"
 
 #include "glm/glm.hpp"
@@ -34,6 +36,8 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
 
     while (scene_yaml["scene"]["objects"][index])
     {
+        // TODO: split this up into multiple smaller functions.
+
         int gObjIndex = scene->gObjNextFree;
 
         // TODO: Out of memory check
@@ -57,6 +61,30 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
 
         scene->Transforms[gObjIndex] = Utils::MatrixFromPosRot(position, rotation);
 
+        // Load Behaviour
+        if (scene_yaml["scene"]["objects"][index]["behaviour"].as<string>().compare("__STATIC_GEO__") != 0 &&
+            scene_yaml["scene"]["objects"][index]["behClass"])
+        {
+            scene->GameObjects[gObjIndex].flags |= GOBJ_FLAG_HAS_BEHAVIOUR;
+            string className = scene_yaml["scene"]["objects"][index]["behClass"].as<string>();
+
+            ScriptEngine::bObj_t bObj;
+            ScriptEngine::CreateBehaviourObject(error_code, &bObj, scene->GObjNames[gObjIndex], className, 
+                "mnt/" + scene_yaml["scene"]["objects"][index]["behaviour"].as<string>());
+
+            if (*error_code == SCRIPT_COMPILE_ERROR)
+            {
+                *error_code = SCRIPT_ENGINE_WARNING;
+
+                // Don't continue with creating this game object
+                fprintf(stderr, "ERROR::LEVEL::Could not create game object %s\n", scene->GObjNames[gObjIndex].c_str());
+                scene->GameObjects[gObjIndex].flags ^= GOBJ_FLAGS_ACTIVE_AND_ALIVE;
+                index++;
+                continue;
+            }
+
+            scene->Behaviours[gObjIndex] = bObj;
+        }
 
         // TODO: manage loading of models so we don't load duplicate models.
         // Load visual model. TODO: null checks
@@ -64,9 +92,13 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
             "mnt/" + scene_yaml["scene"]["objects"][index]["model"].as<string>()));
         scene->GameObjects[gObjIndex].modelIndex = scene->LoadedModels.size()-1;
 
+        if (scene_yaml["scene"]["objects"][index]["collType"].as<int>() != GOBJ_NO_COLLIDER)
+            scene->GameObjects[gObjIndex].flags |= GOBJ_FLAG_HAS_COLLISION;
+
         // Load collision model as surfaces. TODO: null checks
         if (scene_yaml["scene"]["objects"][index]["collType"].as<int>() == GOBJ_SURFACE_COLLIDERS)
         {
+            scene->GameObjects[gObjIndex].flags |= GOBJ_FLAG_SURFACE;
             scene->GameObjects[gObjIndex].collisionSurfaceStart = scene->CollisionSurfaces.size();
             Scene::CreateSurfacesFromFile(error_code, &scene->CollisionSurfaces, 
                 "mnt/" + scene_yaml["scene"]["objects"][index]["collFile"].as<string>());

@@ -12,7 +12,8 @@
 #include "game/scene.hpp"
 
 using namespace Scene;
-using std::string, std::vector;
+using std::string;
+using std::vector;
 
 namespace Scene {
 void ProcessNode(vector<collision_surface_t> *surfaces, aiNode *node, const aiScene *scene);

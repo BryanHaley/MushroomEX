@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 using namespace Utils;
 using glm::vec3;
@@ -30,4 +31,62 @@ mat4 Utils::MatrixFromPosRot(float position[3], float euler[3])
     mat4 matrix = glm::eulerAngleYXZ(euler[0], euler[1], euler[2]);
     matrix = glm::translate(matrix, translation);
     return matrix;
+}
+
+void vCheckError(bool assertion, std::string format, va_list args)
+{
+    if (!assertion)
+    {
+        vfprintf(stderr, format.c_str(), args);
+        fprintf(stderr, "\n");
+        abort();
+    }
+}
+
+void Utils::CheckForError(bool assertion, std::string format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vCheckError(assertion, format, args);
+}
+
+// Exactly the same as above. Just for code clarity.
+void Utils::TryAndCatchError(bool assertion, std::string format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vCheckError(assertion, format, args);
+}
+
+void vCheckWarning(bool *warningOccured, bool assertion, std::string format, va_list args)
+{
+    if (!assertion)
+    {
+        vfprintf(stderr, format.c_str(), args);
+        fprintf(stderr, "\n");
+        *warningOccured = true; // DON'T set to false otherwise; allows easy stacking of warning checks.
+    }
+}
+
+void Utils::CheckForWarning(bool assertion, std::string format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    bool unused;
+    vCheckWarning(&unused, assertion, format, args);
+}
+
+void Utils::CheckForWarning(bool *warningOccured, bool assertion, std::string format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vCheckWarning(warningOccured, assertion, format, args);
+}
+
+// Exactly the same as above. Just for code clarity.
+void Utils::TryAndCatchWarning(bool *warningOccured, bool assertion, std::string format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vCheckWarning(warningOccured, assertion, format, args);
 }
