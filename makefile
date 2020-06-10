@@ -118,7 +118,7 @@ OBJS     := $(foreach file, $(CXX_SRCS), $(BUILD_DIR)/$(file).o) \
 		    $(foreach file, $(C_SRCS), $(BUILD_DIR)/$(file).o)
 
 # Libraries
-LD_FLAGS := -L$(LIB_DIR) -rpath 'lib' -lc -lstdc++ -lsoil2 -lglfw -ldl -lassimp -lyaml-cpp
+LD_FLAGS := -L$(LIB_DIR) -rpath 'lib' -lc -lstdc++ -pthread -lsoil2 -lglfw -ldl -lassimp -lyaml-cpp
 
 ifeq ($(MACOS_BUILD), 1)
 	LD_FLAGS += -framework CoreVideo -framework OpenGL -framework IOKit -framework Cocoa -framework Carbon

@@ -3,6 +3,7 @@
 
 #include "glm/glm.hpp"
 
+#include <string>
 #include <vector>
 
 namespace Utils {
