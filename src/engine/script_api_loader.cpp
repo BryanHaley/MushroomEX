@@ -9,38 +9,50 @@
 
 #include <string>
 
-using namespace ScriptEngine;
+using namespace ScriptAPI;
 using std::string;
 
-void ScriptEngine::RegisterAPI (int *error_code, script_engine_t *script_engine)
+void ScriptAPI::RegisterAPI (int *error_code, ScriptEngine::script_engine_t *script_engine)
 {
     Utils::TryAndCatchError(
         script_engine->SetMessageCallback(asFUNCTION(scrpt_MessageCallback), 0, asCALL_CDECL) >= NO_ERR, 
         "ERROR::ANGELSCRIPT::Could not set message log callback.");
 
-    // Register types
-    RegisterStdString(script_engine);
+    // Register basic types
+    RegisterStdString(script_engine);         // string
+    RegisterScriptArray(script_engine, true); // arrays
 
     // Register namepspace
     Utils::TryAndCatchError(
-        script_engine->SetDefaultNamespace("MUSH") >= NO_ERR, 
+        script_engine->SetDefaultNamespace(sig_Namespace) >= NO_ERR, 
         "ERROR::ANGELSCRIPT::Could not register engine namespace.");
 
-    // Register functions
+    // Register Behaviour class interface
+    Utils::TryAndCatchError(
+        script_engine->RegisterInterface(sig_AsBehaviour_interface) >= NO_ERR,
+        "ERROR::ANGELSCRIPT::Could not register %s interface.", sig_AsBehaviour_interface);
+    script_engine->RegisterInterfaceMethod(sig_AsBehaviour_interface, sig_AsBehaviour_m_Init);
+    script_engine->RegisterInterfaceMethod(sig_AsBehaviour_interface, sig_AsBehaviour_m_OnActive);
+    script_engine->RegisterInterfaceMethod(sig_AsBehaviour_interface, sig_AsBehaviour_m_EarlyUpdate);
+    script_engine->RegisterInterfaceMethod(sig_AsBehaviour_interface, sig_AsBehaviour_m_Update);
+    script_engine->RegisterInterfaceMethod(sig_AsBehaviour_interface, sig_AsBehaviour_m_LateUpdate);
+
+    // Register API functions/methods/classes. TODO: automate this based on what's in script_api.hpp. Maybe generate
+    // the code?
+
     bool warningOccured; // API Functions can (but shouldn't) optionally fail to be set.
     string warningMessage = "WARNING::ANGELSCRIPT::Failed to register API function: %s";
 
-    string Print = "void Print(const string &in)";
     Utils::TryAndCatchWarning( &warningOccured,
-        script_engine->RegisterGlobalFunction(Print.c_str(), asFUNCTION(scrpt_Print), asCALL_CDECL), warningMessage, Print.c_str());
-
-    string GetTime = "float GetTime()";
+        script_engine->RegisterGlobalFunction(sig_Print, asFUNCTION(scrpt_Print), asCALL_CDECL), warningMessage, sig_Print);
     Utils::TryAndCatchWarning( &warningOccured,
-        script_engine->RegisterGlobalFunction(GetTime.c_str(), asFUNCTION(scrpt_GetTime), asCALL_CDECL), warningMessage, GetTime.c_str());
-
-    string GetDeltaTime = "float GetDeltaTime()";
+        script_engine->RegisterGlobalFunction(sig_GetTime, asFUNCTION(scrpt_GetTime), asCALL_CDECL), warningMessage, sig_GetTime);
     Utils::TryAndCatchWarning( &warningOccured,
-        script_engine->RegisterGlobalFunction(GetDeltaTime.c_str(), asFUNCTION(scrpt_GetDeltaTime), asCALL_CDECL), warningMessage, GetDeltaTime.c_str());
+        script_engine->RegisterGlobalFunction(sig_GetDeltaTime, asFUNCTION(scrpt_GetDeltaTime), asCALL_CDECL), warningMessage, sig_GetDeltaTime);
+    Utils::TryAndCatchWarning( &warningOccured,
+        script_engine->RegisterGlobalFunction(sig_Translate, asFUNCTION(scrpt_Translate), asCALL_CDECL), warningMessage, sig_Translate);
+    Utils::TryAndCatchWarning( &warningOccured,
+        script_engine->RegisterGlobalFunction(sig_Rotate, asFUNCTION(scrpt_Rotate), asCALL_CDECL), warningMessage, sig_Rotate);
 
     if (warningOccured)
     {

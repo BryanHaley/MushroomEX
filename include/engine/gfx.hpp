@@ -3,7 +3,6 @@
 
 #include <GL/gl3w.h>
 #include "engine/gfx_data.hpp"
-#include "engine/globals.hpp"
 
 // TODO: put these into some sort of global settings struct
 extern unsigned int g_ScrWidth, g_ScrHeight;

@@ -8,9 +8,11 @@
 
 #include "engine/surface_data.hpp"
 #include "engine/gfx.hpp"
-#include "engine/script_engine.hpp"
 #include "game/game_object.hpp"
+#include "engine/script_engine.hpp"
+
 #include "glm/glm.hpp"
+
 #include <stdint.h>
 #include <vector>
 
@@ -34,7 +36,7 @@ namespace Scene
         std::vector<ScriptEngine::bObj_t>  Behaviours;
         //--------------------------------------------------------------------------------------------------------------
         
-        ScriptEngine::script_engine_t    *script_engine;    // Handles behaviours
+        //ScriptEngine::script_engine_t  *script_engine;    // Handles behaviours
         uint32_t                         gObjNextFree;      // The index+1 of the last initialized game object. Game 
                                                             //  objects past this index are allocated, but unused.
         std::vector<model_t>             LoadedModels;      // List of loaded models the gobjs can reference by index.
@@ -54,4 +56,5 @@ namespace Scene
     void Unload (scene_t* scene);
 
 }
+
 #endif

@@ -1,9 +1,9 @@
 /* Scene Loader
  * Functions that handle scene operations during runtime. */
 
+#include "game/scene.hpp"
 #include "engine/utils.hpp"
 #include "engine/script_engine.hpp"
-#include "game/scene.hpp"
 #include "engine/error_return_types.h"
 
 #include <stdlib.h>
@@ -15,6 +15,10 @@
 using namespace Scene;
 using std::string;
 using std::vector;
+
+// Ugly hack to store a global reference to the scene for script functions to be able to manipulate it. TODO: Fix
+// this.
+Scene::scene_t *CurrentScene;
 
 void Scene::Init (scene_t* scene)
 {
@@ -36,8 +40,9 @@ void Scene::Init (scene_t* scene)
     scene->Behaviours        .resize (OBJECT_BANK_SIZE);
     //Utils::CheckIfVectorOutOfMemory(&scene->Behaviours, OBJECT_BANK_SIZE);
 
-    int unused; // InitEngine prints out its non-fatal errors already
-    ScriptEngine::InitEngine(&unused);
+    CurrentScene = scene;
+
+    ScriptEngine::InitEngine();
 }
 
 void Scene::Start (scene_t* scene)
@@ -47,7 +52,11 @@ void Scene::Start (scene_t* scene)
         if (scene->GameObjects[i].flags & GOBJ_FLAG_ALIVE)
         {
             int error_code;
-            ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_Init);
+            ScriptEngine::bRout_arg_t arg_gObjHandle;
+            arg_gObjHandle.type = ScriptEngine::T_UINT32;
+            arg_gObjHandle.val_uint32 = i;
+
+            ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_Init, NULL, 1, &arg_gObjHandle);
 
             if (error_code != NO_ERR)
             {

@@ -25,7 +25,7 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
     // Check to see if yaml is valid. TODO: more robust validation function;
     if (!scene_yaml || !scene_yaml["scene"])
     {
-        fprintf(stderr, "ERROR::LEVEL::Unable to load level from file: %s\n", filename.c_str());
+        fprintf(stderr, "ERROR::SCENE::Unable to load scene from file: %s\n", filename.c_str());
         *error_code = FILE_IO_ERR;
         return;
     }
@@ -33,6 +33,7 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
     // Get object filenames from yaml
     vector<string> geoModels, collModels;
     int index = 0;
+    scene->gObjNextFree = 0;
 
     while (scene_yaml["scene"]["objects"][index])
     {
@@ -77,7 +78,7 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
                 *error_code = SCRIPT_ENGINE_WARNING;
 
                 // Don't continue with creating this game object
-                fprintf(stderr, "ERROR::LEVEL::Could not create game object %s\n", scene->GObjNames[gObjIndex].c_str());
+                fprintf(stderr, "ERROR::SCENE::Could not create game object \"%s\"\n", scene->GObjNames[gObjIndex].c_str());
                 scene->GameObjects[gObjIndex].flags ^= GOBJ_FLAGS_ACTIVE_AND_ALIVE;
                 index++;
                 continue;
