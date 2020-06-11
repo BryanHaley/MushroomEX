@@ -49,7 +49,7 @@ void Scene::Start (scene_t* scene)
 {
     for (size_t i = 0; i < scene->gObjNextFree; i++)
     {
-        if (scene->GameObjects[i].flags & GOBJ_FLAG_ALIVE)
+        if (scene->GameObjects[i].flags & (GOBJ_FLAG_ALIVE | GOBJ_FLAG_HAS_BEHAVIOUR))
         {
             int error_code;
             ScriptEngine::bRout_arg_t arg_gObjHandle;
@@ -65,7 +65,7 @@ void Scene::Start (scene_t* scene)
             }
         }
 
-        if (scene->GameObjects[i].flags & GOBJ_FLAG_ACTIVE)
+        if (scene->GameObjects[i].flags & (GOBJ_FLAG_ACTIVE | GOBJ_FLAG_HAS_BEHAVIOUR))
         {
             int error_code;
             ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_OnActive);
@@ -84,7 +84,7 @@ void Scene::Update (scene_t* scene)
     // Early Update
     for (size_t i = 0; i < scene->gObjNextFree; i++)
     {
-        if (scene->GameObjects[i].flags & GOBJ_FLAGS_ACTIVE_AND_ALIVE)
+        if (scene->GameObjects[i].flags & (GOBJ_FLAGS_ACTIVE_AND_ALIVE | GOBJ_FLAG_HAS_BEHAVIOUR))
         {
             int error_code;
             ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_EarlyUpdate);
@@ -100,7 +100,7 @@ void Scene::Update (scene_t* scene)
     // Update
     for (size_t i = 0; i < scene->gObjNextFree; i++)
     {
-        if (scene->GameObjects[i].flags & GOBJ_FLAGS_ACTIVE_AND_ALIVE)
+        if (scene->GameObjects[i].flags & (GOBJ_FLAGS_ACTIVE_AND_ALIVE | GOBJ_FLAG_HAS_BEHAVIOUR))
         {
             int error_code;
             ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_Update);
@@ -116,7 +116,7 @@ void Scene::Update (scene_t* scene)
     // Late Update
     for (size_t i = 0; i < scene->gObjNextFree; i++)
     {
-        if (scene->GameObjects[i].flags & GOBJ_FLAGS_ACTIVE_AND_ALIVE)
+        if (scene->GameObjects[i].flags & (GOBJ_FLAGS_ACTIVE_AND_ALIVE | GOBJ_FLAG_HAS_BEHAVIOUR))
         {
             int error_code;
             ScriptEngine::RunBehaviourRoutine(&error_code, &scene->Behaviours[i], scene->Behaviours[i].func_LateUpdate);

@@ -2,11 +2,13 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <vector>
 
 #include "engine/error_return_types.h"
 #include "engine/utils.hpp"
 #include "engine/gfx.hpp"
 #include "game/scene.hpp"
+#include "engine/globals.hpp"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
@@ -128,7 +130,10 @@ void processInput(GLFWwindow *window)
     if      (glfwGetKey(window, GLFW_KEY_UP)    == GLFW_PRESS) wishLook.y = glm::radians(-50.0f * g_DeltaTime);
     else if (glfwGetKey(window, GLFW_KEY_DOWN)  == GLFW_PRESS) wishLook.y = glm::radians( 50.0f * g_DeltaTime);
 
-    debug_spectator_update(wishMove, wishLook);
+    bool wishRay = false;
+    if      (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)     wishRay = true;
+
+    debug_spectator_update(wishMove, wishLook, wishRay);
 
     #endif
 }

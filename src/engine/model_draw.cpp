@@ -1,4 +1,5 @@
 #include "engine/gfx.hpp"
+#include "engine/globals.hpp"
 #include "glm/glm.hpp"
 
 // TODO: It'd be faster to load all the meshes into one big array rather than rendering each model's meshes individually

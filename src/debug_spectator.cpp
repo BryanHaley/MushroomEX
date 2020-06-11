@@ -1,5 +1,7 @@
 #include "debug_spectator.hpp"
 #include "engine/gfx.hpp"
+#include "engine/surface_collision.hpp"
+#include "engine/globals.hpp"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
@@ -13,7 +15,7 @@ void debug_spectator_init()
 	g_dbgspecForward  = glm::vec3(0.0f, 0.0f, 1.0f);
 }
 
-void debug_spectator_update(glm::vec3 wishMove, glm::vec2 wishLook)
+void debug_spectator_update(glm::vec3 wishMove, glm::vec2 wishLook, bool wishRay)
 {
 	// Rotate around world up axis (yaw)
 	glm::mat4 rotationMatrix(1.0f);
@@ -42,4 +44,15 @@ void debug_spectator_update(glm::vec3 wishMove, glm::vec2 wishLook)
 
 	// Update view matrix with new camera position
 	g_ViewMatrix = glm::lookAt(g_dbgspecPosition, g_dbgspecPosition + g_dbgspecForward, g_WorldUpVector);
+
+	if (wishRay)
+	{
+		glm::vec3 hitPos (0.0f);
+
+		if (SurfaceCollision::Raycast(g_dbgspecPosition, g_dbgspecForward, hitPos, CurrentScene))
+		{
+			printf("Raycast hit at: (%f, %f, %f)\n", hitPos.x, hitPos.y, hitPos.z);
+			CurrentScene->Transforms[1] = glm::translate(glm::mat4(1.0f), hitPos);
+		}
+	}
 }

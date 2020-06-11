@@ -106,6 +106,8 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
             scene->GameObjects[gObjIndex].collisionSurfaceEnd   = scene->CollisionSurfaces.size();
         }
 
+        // TODO: Collision cylinders
+
         // Increment index of next free game object
         scene->gObjNextFree++;
 

@@ -13,7 +13,6 @@ extern bool g_Fullscreen;
 extern GLuint MISSING_TEXTURE_INDEX;
 extern std::vector<model_t> g_LoadedModels;
 extern std::vector<shader_t> g_LoadedShaders;
-extern glm::mat4 g_ViewMatrix, g_ProjMatrix;
 extern glm::vec3 g_WorldUpVector, g_WorldForwardVector, g_WorldRightVector;
 
 int gfx_init();
