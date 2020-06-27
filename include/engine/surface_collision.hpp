@@ -38,10 +38,8 @@ namespace SurfaceCollision
         // control
         bool onlyCheckWalls );
 
-    glm::vec3 GetSurfaceCollisionVector (
-        const glm::vec3 &position, const float radius, const float height,
-        const std::vector<collision_t> &wallCollisions, 
-        const std::vector<collision_t> &floorCollisions);
+    glm::vec3 GetWallCollisionVector  (const glm::vec3 &position, const std::vector<collision_t> &wallCollisions);
+    glm::vec3 GetFloorCollisionVector (const glm::vec3 &position, const std::vector<collision_t> &floorCollisions);
 }
 
 #endif

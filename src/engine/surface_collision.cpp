@@ -294,14 +294,10 @@ void SurfaceCollision::FindSurfaceCollisions (
 
 // Reference for implementation: https://www.youtube.com/watch?v=UnU7DJXiMAQ&t=138s 
 // Ceilings must be handled by the character controller as the don't directly "push" Mario anywhere.
-glm::vec3 GetSurfaceCollisionVector (
-    const glm::vec3 &position, const float radius, const float height,
-    const std::vector<collision_t> &wallCollisions, 
-    const std::vector<collision_t> &floorCollisions)
+glm::vec3 GetWallCollisionVector (const glm::vec3 &position, const std::vector<collision_t> &wallCollisions)
 {
     glm::vec3 newPosition;
 
-    // Walls, then floors, then ceilings.
     for (int i = 0; i < wallCollisions.size(); i++)
     {
         // Find push vector
@@ -318,6 +314,13 @@ glm::vec3 GetSurfaceCollisionVector (
         glm::vec3 pushPosition = wallCollisions[i].positionOnSurface + (pushVector*wallCollisions[i].surfaceThickness);
         newPosition += pushPosition;
     }
+
+    return newPosition-position;
+}
+
+glm::vec3 GetFloorCollisionVector (const glm::vec3 &position, const std::vector<collision_t> &floorCollisions)
+{
+    glm::vec3 newPosition;
 
     for (int i = 0; i < floorCollisions.size(); i++)
     {
