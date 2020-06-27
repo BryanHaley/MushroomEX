@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <vector>
+#include <limits>
 
 using namespace glm;
 using namespace SurfaceCollision;
@@ -296,7 +297,9 @@ void SurfaceCollision::FindSurfaceCollisions (
 // Ceilings must be handled by the character controller as the don't directly "push" Mario anywhere.
 glm::vec3 GetWallCollisionVector (const glm::vec3 &position, const std::vector<collision_t> &wallCollisions)
 {
-    glm::vec3 newPosition;
+    if (wallCollisions.size() == 0) return glm::vec3(0.0f);
+
+    glm::vec3 newPosition = position;
 
     for (int i = 0; i < wallCollisions.size(); i++)
     {
@@ -312,7 +315,7 @@ glm::vec3 GetWallCollisionVector (const glm::vec3 &position, const std::vector<c
         else pushVector.x = -1;
 
         glm::vec3 pushPosition = wallCollisions[i].positionOnSurface + (pushVector*wallCollisions[i].surfaceThickness);
-        newPosition += pushPosition;
+        newPosition += pushPosition-position;
     }
 
     return newPosition-position;
@@ -320,13 +323,15 @@ glm::vec3 GetWallCollisionVector (const glm::vec3 &position, const std::vector<c
 
 glm::vec3 GetFloorCollisionVector (const glm::vec3 &position, const std::vector<collision_t> &floorCollisions)
 {
-    glm::vec3 newPosition;
+    if (floorCollisions.size() == 0) return glm::vec3(0.0f);
+
+    glm::vec3 newPosition = glm::vec3(0.0f, std::numeric_limits<float>::min(), 0.0f);
 
     for (int i = 0; i < floorCollisions.size(); i++)
     {
-        glm::vec3 pushVector = glm::vec3(0.0f, 1.0f, 0.0f);
-        glm::vec3 pushPosition = floorCollisions[i].positionOnSurface + (pushVector*floorCollisions[i].surfaceThickness);
-        newPosition += pushPosition;
+        // New position becomes whichever floor is pushing the object highest
+        if (floorCollisions[i].positionOnSurface.y > newPosition.y)
+            newPosition = floorCollisions[i].positionOnSurface;
     }
 
     return newPosition-position;
