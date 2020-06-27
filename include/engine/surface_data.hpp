@@ -7,7 +7,9 @@
 
 typedef struct
 {
+    uint32_t gObjIndex;
 	glm::vec3 v0, v1, v2;
+    glm::vec3 normal;
 	uint32_t flags;
 } collision_surface_t;
 
@@ -41,10 +43,10 @@ typedef struct
 #define SURFACE_CUSTOM_12       0b00000001000000000000000000000000 // Custom surface flag open for mods to define.
 #define SURFACE_CUSTOM_13       0b00000010000000000000000000000000 // Custom surface flag open for mods to define.
 #define SURFACE_CUSTOM_14       0b00000100000000000000000000000000 // Custom surface flag open for mods to define.
-#define SURFACE_CUSTOM_15       0b00001000000000000000000000000000 // Custom surface flag open for mods to define.
-#define SURFACE_CUSTOM_16       0b00010000000000000000000000000000 // Custom surface flag open for mods to define.
-#define SURFACE_CUSTOM_17       0b00100000000000000000000000000000 // Custom surface flag open for mods to define.
-#define SURFACE_CUSTOM_18       0b01000000000000000000000000000000 // Custom surface flag open for mods to define.
-#define SURFACE_CUSTOM_19       0b10000000000000000000000000000000 // Custom surface flag open for mods to define.
+#define SURFACE_STATIC          0b00001000000000000000000000000000 // Cache if the surface moves (most will not).
+#define SURFACE_FACING_Z        0b00010000000000000000000000000000 // Used to determine if a wall is facing more towards the z or x axis.
+#define SURFACE_CEILING         0b00100000000000000000000000000000 // Cache if a surface is a ceiling.
+#define SURFACE_FLOOR           0b01000000000000000000000000000000 // Cache if a surface is a floor.
+#define SURFACE_WALL            0b10000000000000000000000000000000 // Cache if a surface is a wall.
 
 #endif

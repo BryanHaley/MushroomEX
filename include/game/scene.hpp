@@ -46,7 +46,8 @@ namespace Scene
 
     // Loading
     void    LoadFromFile           (int *error_code, scene_t *scene, std::string filename);
-    void    CreateSurfacesFromFile (int *error_code, std::vector<collision_surface_t> *surfaces, const std::string filename);
+    void    CreateSurfacesFromFile (int *error_code, bool isStatic, int gObjIndex, 
+                                    std::vector<collision_surface_t> &surfaces, const std::string filename);
 
     // Runtime Operations
     void Init   (scene_t* scene); // <-- Call BEFORE loading from file.

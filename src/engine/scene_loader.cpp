@@ -63,8 +63,8 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
         scene->Transforms[gObjIndex] = Utils::MatrixFromPosRot(position, rotation);
 
         // Load Behaviour
-        if (scene_yaml["scene"]["objects"][index]["behaviour"].as<string>().compare("__STATIC_GEO__") != 0 &&
-            scene_yaml["scene"]["objects"][index]["behClass"])
+        bool isStaticGeo = scene_yaml["scene"]["objects"][index]["behaviour"].as<string>().compare("__STATIC_GEO__") == 0;
+        if (!isStaticGeo && scene_yaml["scene"]["objects"][index]["behClass"])
         {
             scene->GameObjects[gObjIndex].flags |= GOBJ_FLAG_HAS_BEHAVIOUR;
             string className = scene_yaml["scene"]["objects"][index]["behClass"].as<string>();
@@ -101,7 +101,7 @@ void Scene::LoadFromFile (int *error_code, scene_t* scene, string filename)
         {
             scene->GameObjects[gObjIndex].flags |= GOBJ_FLAG_SURFACE;
             scene->GameObjects[gObjIndex].collisionSurfaceStart = scene->CollisionSurfaces.size();
-            Scene::CreateSurfacesFromFile(error_code, &scene->CollisionSurfaces, 
+            Scene::CreateSurfacesFromFile(error_code, isStaticGeo, gObjIndex, scene->CollisionSurfaces, 
                 "mnt/" + scene_yaml["scene"]["objects"][index]["collFile"].as<string>());
             scene->GameObjects[gObjIndex].collisionSurfaceEnd   = scene->CollisionSurfaces.size();
         }

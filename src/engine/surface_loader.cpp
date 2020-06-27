@@ -9,6 +9,7 @@
 #include "engine/error_return_types.h"
 #include "engine/gfx.hpp"
 #include "engine/surface_data.hpp"
+#include "engine/surface_collision.hpp"
 #include "game/scene.hpp"
 
 using namespace Scene;
@@ -16,15 +17,15 @@ using std::string;
 using std::vector;
 
 namespace Scene {
-void ProcessNode(vector<collision_surface_t> *surfaces, aiNode *node, const aiScene *scene);
-void ProcessMesh(vector<collision_surface_t> *surfaces, aiMesh *mesh, const aiScene *scene);
+void ProcessNode(vector<collision_surface_t> &surfaces, aiNode *node, const aiScene *scene);
+void ProcessMesh(vector<collision_surface_t> &surfaces, aiMesh *mesh, const aiScene *scene);
 }
 
 /* For now just load the triangles from a model with assimp just like mesh_loader.cpp In the future when I
  * have a level editor set up, I'll want to create a custom OBJ-like file format for static geometry that will
  * let me encode surface data along with the triangles of the collision surfaces into a single file. */
 
-void Scene::CreateSurfacesFromFile(int *error_code, vector<collision_surface_t> *surfaces, const string filename)
+void Scene::CreateSurfacesFromFile(int *error_code, bool isStatic, int gObjIndex, vector<collision_surface_t> &surfaces, const string filename)
 {
 	// Load model into assimp scene
 	Assimp::Importer importer;
@@ -40,9 +41,15 @@ void Scene::CreateSurfacesFromFile(int *error_code, vector<collision_surface_t> 
 
     // recurse through scene tree looking for meshes
     ProcessNode(surfaces, scene->mRootNode, scene);
+
+    for (int i = 0; i < surfaces.size(); i++)
+    {
+        surfaces[i].gObjIndex = gObjIndex;
+        if (isStatic) surfaces[i].flags &= SURFACE_STATIC;
+    }
 }
 
-void Scene::ProcessNode(vector<collision_surface_t> *surfaces, aiNode *node, const aiScene *scene)
+void Scene::ProcessNode(vector<collision_surface_t> &surfaces, aiNode *node, const aiScene *scene)
 {
     // process each mesh located at the current node
     for(size_t i = 0; i < node->mNumMeshes; i++)
@@ -58,7 +65,7 @@ void Scene::ProcessNode(vector<collision_surface_t> *surfaces, aiNode *node, con
 
 }
 
-void Scene::ProcessMesh(vector<collision_surface_t> *surfaces, aiMesh *mesh, const aiScene *scene)
+void Scene::ProcessMesh(vector<collision_surface_t> &surfaces, aiMesh *mesh, const aiScene *scene)
 {
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
@@ -78,6 +85,19 @@ void Scene::ProcessMesh(vector<collision_surface_t> *surfaces, aiMesh *mesh, con
         aiVector3D mesh_v2 = mesh->mVertices[face.mIndices[2]];
         surface.v2 = glm::vec3(mesh_v2.x, mesh_v2.y, mesh_v2.z);
 
-        surfaces->push_back(surface);
+        // Get normal of face by finding average direction vector of vertice normals
+        aiVector3D mesh_v0_n = mesh->mNormals[face.mIndices[0]];
+        aiVector3D mesh_v1_n = mesh->mNormals[face.mIndices[1]];
+        aiVector3D mesh_v2_n = mesh->mNormals[face.mIndices[2]];
+
+        float norm_x = (mesh_v0_n.x+mesh_v1_n.y+mesh_v2_n.z)/3;
+        float norm_y = (mesh_v0_n.x+mesh_v1_n.y+mesh_v2_n.z)/3;
+        float norm_z = (mesh_v0_n.x+mesh_v1_n.y+mesh_v2_n.z)/3;
+
+        surface.normal = glm::vec3(norm_x, norm_y, norm_z);
+
+        SurfaceCollision::CacheSurfaceInfo(surface);
+
+        surfaces.push_back(surface);
     }
 }

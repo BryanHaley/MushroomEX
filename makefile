@@ -161,9 +161,9 @@ endif
 
 # Conditional commands
 WARN_LIBS_COMMAND :=
-ifeq ("$(wildcard $(SRC_DIR)/$(GL3W_SRC))","")
-    WARN_LIBS_COMMAND := @echo "WARNING: LIBS HAVE NOT BEEN BUILT. Run make build_libs"
-endif
+#ifeq ("$(wildcard $(SRC_DIR)/$(GL3W_SRC))","")
+#    WARN_LIBS_COMMAND := @echo "WARNING: LIBS HAVE NOT BEEN BUILT. Run make build_libs"
+#endif
 
 
 # Rules for building MushroomEX

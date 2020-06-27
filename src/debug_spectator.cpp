@@ -49,7 +49,7 @@ void debug_spectator_update(glm::vec3 wishMove, glm::vec2 wishLook, bool wishRay
 	{
 		glm::vec3 hitPos (0.0f);
 
-		if (SurfaceCollision::Raycast(g_dbgspecPosition, g_dbgspecForward, hitPos, CurrentScene))
+		if (SurfaceCollision::Raycast(g_dbgspecPosition, g_dbgspecForward, &hitPos, *CurrentScene))
 		{
 			printf("Raycast hit at: (%f, %f, %f)\n", hitPos.x, hitPos.y, hitPos.z);
 			CurrentScene->Transforms[1] = glm::translate(glm::mat4(1.0f), hitPos);
